@@ -57,3 +57,21 @@ export const getTasks = async (
     };
   }
 };
+
+export const getTaskById = async (_id: string): Promise<DbResult<ITask | null>> => {
+  try {
+    const task = await TaskModel.findById(_id).exec();
+
+    return {
+      status: "success",
+      data: task,
+    };
+  } catch (error) {
+    console.error("Failed to get task by id:", error);
+    return {
+      status: "error",
+      message:
+        error instanceof Error ? error.message : "Failed to get task",
+    };
+  }
+};

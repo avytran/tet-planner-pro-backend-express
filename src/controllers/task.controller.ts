@@ -1,5 +1,10 @@
 import { Request, Response, NextFunction } from "express";
-import { createTask, getTasks, GetTasksFilter } from "../services/task.service";
+import {
+  createTask,
+  getTasks,
+  getTaskById,
+  GetTasksFilter,
+} from "../services/task.service";
 import { Timeline, Priority, TaskStatus } from "../types/task.types";
 
 export const createTaskHandler = async (
@@ -98,6 +103,30 @@ export const getTasksHandler = async (
 
     if (result.status === "error") {
       return res.status(500).json(result);
+    }
+
+    return res.status(200).json(result);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const getTaskByIdHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { task_id } = req.params;
+
+    const result = await getTaskById(task_id as string);
+
+    if (result.status === "error") {
+      return res.status(500).json(result);
+    }
+
+    if (!result.data) {
+      return res.status(404).json({ message: "Task not found" });
     }
 
     return res.status(200).json(result);

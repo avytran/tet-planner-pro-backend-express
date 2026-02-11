@@ -4,7 +4,9 @@ import {
   getTasks,
   getTaskById,
   updateTask,
+  patchTask,
   GetTasksFilter,
+  UpdateTaskInput,
 } from "../services/task.service";
 import { Timeline, Priority, TaskStatus } from "../types/task.types";
 
@@ -28,7 +30,7 @@ export const createTaskHandler = async (
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    const validTimelines: Timeline[] = ["Before Tet", "30 Tet", "Mung1-3"];
+    const validTimelines: Timeline[] = ["Before Tet", "30 Tet", "Mung1", "Mung2", "Mung3"];
     const validPriorities: Priority[] = ["Low", "Medium", "High"];
     const validStatuses: TaskStatus[] = ["Todo", "In Progress", "Done"];
 
@@ -77,7 +79,7 @@ export const getTasksHandler = async (
     }
 
     if (typeof timeline === "string") {
-      const validTimelines: Timeline[] = ["Before Tet", "30 Tet", "Mung1-3"];
+      const validTimelines: Timeline[] = ["Before Tet", "30 Tet", "Mung1", "Mung2", "Mung3"];
       if (!validTimelines.includes(timeline as Timeline)) {
         return res.status(400).json({ message: "Invalid timeline value" });
       }
@@ -157,7 +159,7 @@ export const updateTaskHandler = async (
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    const validTimelines: Timeline[] = ["Before Tet", "30 Tet", "Mung1-3"];
+    const validTimelines: Timeline[] = ["Before Tet", "30 Tet", "Mung1", "Mung2", "Mung3"];
     const validPriorities: Priority[] = ["Low", "Medium", "High"];
     const validStatuses: TaskStatus[] = ["Todo", "In Progress", "Done"];
 
@@ -181,6 +183,82 @@ export const updateTaskHandler = async (
       priority,
       status,
     });
+
+    if (result.status === "error") {
+      return res.status(500).json(result);
+    }
+
+    if (!result.data) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    return res.status(200).json(result);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const patchTaskHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { task_id } = req.params;
+    const { category_id, title, dued_time, timeline, priority, status } =
+      req.body;
+
+    if (
+      category_id === undefined &&
+      title === undefined &&
+      dued_time === undefined &&
+      timeline === undefined &&
+      priority === undefined &&
+      status === undefined
+    ) {
+      return res.status(400).json({ message: "No fields to update" });
+    }
+
+    const update: UpdateTaskInput = {};
+
+    if (category_id !== undefined) {
+      update.category_id = category_id;
+    }
+
+    if (title !== undefined) {
+      update.title = title;
+    }
+
+
+    if (dued_time !== undefined) {
+      update.dued_time = dued_time;
+    }
+
+    if (timeline !== undefined) {
+      const validTimelines: Timeline[] = ["Before Tet", "30 Tet", "Mung1", "Mung2", "Mung3"];
+      if (!validTimelines.includes(timeline)) {
+        return res.status(400).json({ message: "Invalid timeline value" });
+      }
+      update.timeline = timeline;
+    }
+
+    if (priority !== undefined) {
+      const validPriorities: Priority[] = ["Low", "Medium", "High"];
+      if (!validPriorities.includes(priority)) {
+        return res.status(400).json({ message: "Invalid priority value" });
+      }
+      update.priority = priority;
+    }
+
+    if (status !== undefined) {
+      const validStatuses: TaskStatus[] = ["Todo", "In Progress", "Done"];
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ message: "Invalid status value" });
+      }
+      update.status = status;
+    }
+
+    const result = await patchTask(task_id as string, update);
 
     if (result.status === "error") {
       return res.status(500).json(result);

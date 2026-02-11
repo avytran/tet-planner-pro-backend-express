@@ -18,6 +18,8 @@ export interface GetTasksFilter {
   status?: TaskStatus;
 }
 
+export type UpdateTaskInput = Partial<CreateTaskInput>;
+
 export const createTask = async (
   payload: CreateTaskInput
 ): Promise<DbResult<ITask>> => {
@@ -96,6 +98,30 @@ export const updateTask = async (
       status: "error",
       message:
         error instanceof Error ? error.message : "Failed to update task",
+    };
+  }
+};
+
+export const patchTask = async (
+  _id: string,
+  payload: UpdateTaskInput
+): Promise<DbResult<ITask | null>> => {
+  try {
+    const task = await TaskModel.findByIdAndUpdate(_id, payload, {
+      new: true,
+      runValidators: true,
+    }).exec();
+
+    return {
+      status: "success",
+      data: task,
+    };
+  } catch (error) {
+    console.error("Failed to patch task:", error);
+    return {
+      status: "error",
+      message:
+        error instanceof Error ? error.message : "Failed to patch task",
     };
   }
 };

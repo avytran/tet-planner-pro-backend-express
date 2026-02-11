@@ -30,7 +30,7 @@ const TaskSchema: Schema<ITask> = new Schema(
 
     timeline: {
       type: String,
-      enum: ["Before Tet", "30 Tet", "Mung1-3"],
+      enum: ["Before Tet", "30 Tet", "Mung1", "Mung2", "Mung3"],
       required: true,
     },
 

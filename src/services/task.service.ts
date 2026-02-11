@@ -1,5 +1,5 @@
 import TaskModel, { ITask } from "../database/models/task.model";
-import { Task } from "../types/task.types";
+import { Task, Timeline, Priority, TaskStatus } from "../types/task.types";
 import { DbResult } from "../types/dbResult";
 
 export interface CreateTaskInput {
@@ -9,6 +9,13 @@ export interface CreateTaskInput {
   timeline: Task["timeline"];
   priority: Task["priority"];
   status: Task["status"];
+}
+
+export interface GetTasksFilter {
+  category_id?: string;
+  timeline?: Timeline;
+  priority?: Priority;
+  status?: TaskStatus;
 }
 
 export const createTask = async (
@@ -27,6 +34,26 @@ export const createTask = async (
       status: "error",
       message:
         error instanceof Error ? error.message : "Failed to create task",
+    };
+  }
+};
+
+export const getTasks = async (
+  filter: GetTasksFilter
+): Promise<DbResult<ITask[]>> => {
+  try {
+    const tasks = await TaskModel.find(filter).exec();
+
+    return {
+      status: "success",
+      data: tasks,
+    };
+  } catch (error) {
+    console.error("Failed to get tasks:", error);
+    return {
+      status: "error",
+      message:
+        error instanceof Error ? error.message : "Failed to get tasks",
     };
   }
 };

@@ -7,8 +7,10 @@ import {
   patchTask,
   GetTasksFilter,
   UpdateTaskInput,
+  deleteTask,
 } from "../services/task.service";
 import { Timeline, Priority, TaskStatus } from "../types/task.types";
+import mongoose from "mongoose";
 
 export const createTaskHandler = async (
   req: Request,
@@ -122,8 +124,15 @@ export const getTaskByIdHandler = async (
   try {
     const { task_id } = req.params;
 
-    const result = await getTaskById(task_id as string);
+    if (!mongoose.Types.ObjectId.isValid(task_id as string)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid task id",
+      });
+    }
 
+    const result = await getTaskById(task_id as string);
+    
     if (result.status === "error") {
       return res.status(500).json(result);
     }
@@ -147,6 +156,13 @@ export const updateTaskHandler = async (
     const { task_id } = req.params;
     const { category_id, title, dued_time, timeline, priority, status } =
       req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(task_id as string)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid task id",
+      });
+    }
 
     if (
       !category_id ||
@@ -208,6 +224,13 @@ export const patchTaskHandler = async (
     const { category_id, title, dued_time, timeline, priority, status } =
       req.body;
 
+    if (!mongoose.Types.ObjectId.isValid(task_id as string)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid task id",
+      });
+    }
+
     if (
       category_id === undefined &&
       title === undefined &&
@@ -268,6 +291,23 @@ export const patchTaskHandler = async (
       return res.status(404).json({ message: "Task not found" });
     }
 
+    return res.status(200).json(result);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const deleteTaskHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { task_id } = req.params;
+    const result = await deleteTask(task_id as string);
+    if (result.status === "error") {
+      return res.status(500).json(result);
+    }
     return res.status(200).json(result);
   } catch (error) {
     return next(error);

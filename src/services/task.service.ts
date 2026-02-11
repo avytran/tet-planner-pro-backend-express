@@ -125,3 +125,29 @@ export const patchTask = async (
     };
   }
 };
+
+export const deleteTask = async (
+  _id: string
+): Promise<DbResult<{ message: string }>> => 
+{
+    try {
+        const deletedTask = await TaskModel.findByIdAndDelete(_id).exec();
+        if (!deletedTask) {
+            return {
+                status: "error",
+                message: "Task not found",
+            };
+        }
+        return {
+            status: "success",
+            data: { message: "Task deleted successfully" },
+        };
+    } catch (error) {
+        console.error("Failed to delete task:", error);
+        return {
+            status: "error",
+            message:
+                error instanceof Error ? error.message : "Failed to delete task",
+        };
+    }
+}

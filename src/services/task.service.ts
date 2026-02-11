@@ -75,3 +75,27 @@ export const getTaskById = async (_id: string): Promise<DbResult<ITask | null>> 
     };
   }
 };
+
+export const updateTask = async (
+  _id: string,
+  payload: CreateTaskInput
+): Promise<DbResult<ITask | null>> => {
+  try {
+    const task = await TaskModel.findByIdAndUpdate(_id, payload, {
+      new: true,
+      runValidators: true,
+    }).exec();
+
+    return {
+      status: "success",
+      data: task,
+    };
+  } catch (error) {
+    console.error("Failed to update task:", error);
+    return {
+      status: "error",
+      message:
+        error instanceof Error ? error.message : "Failed to update task",
+    };
+  }
+};

@@ -3,6 +3,7 @@ import {
   createTask,
   getTasks,
   getTaskById,
+  updateTask,
   GetTasksFilter,
 } from "../services/task.service";
 import { Timeline, Priority, TaskStatus } from "../types/task.types";
@@ -120,6 +121,66 @@ export const getTaskByIdHandler = async (
     const { task_id } = req.params;
 
     const result = await getTaskById(task_id as string);
+
+    if (result.status === "error") {
+      return res.status(500).json(result);
+    }
+
+    if (!result.data) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    return res.status(200).json(result);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const updateTaskHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { task_id } = req.params;
+    const { category_id, title, dued_time, timeline, priority, status } =
+      req.body;
+
+    if (
+      !category_id ||
+      !title ||
+      !dued_time ||
+      !timeline ||
+      !priority ||
+      !status
+    ) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    const validTimelines: Timeline[] = ["Before Tet", "30 Tet", "Mung1-3"];
+    const validPriorities: Priority[] = ["Low", "Medium", "High"];
+    const validStatuses: TaskStatus[] = ["Todo", "In Progress", "Done"];
+
+    if (!validTimelines.includes(timeline)) {
+      return res.status(400).json({ message: "Invalid timeline value" });
+    }
+
+    if (!validPriorities.includes(priority)) {
+      return res.status(400).json({ message: "Invalid priority value" });
+    }
+
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
+
+    const result = await updateTask(task_id as string, {
+      category_id,
+      title,
+      dued_time,
+      timeline,
+      priority,
+      status,
+    });
 
     if (result.status === "error") {
       return res.status(500).json(result);

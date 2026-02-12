@@ -8,13 +8,6 @@ export const getShoppingItemById = async (
   id: string
 ): Promise<DbResult<ShoppingItem>> => {
   try {
-    if (!ObjectId.isValid(id)) {
-      return {
-        status: "error",
-        message: "Invalid ID format",
-      };
-    }
-
     const item = await ShoppingItemModel.findById(id).exec();
 
     if (!item) {

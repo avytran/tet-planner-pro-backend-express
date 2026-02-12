@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import { Request, Response } from "express";
 import { getShoppingItemById } from "../services/shoppingItem.service";
 
@@ -8,13 +9,17 @@ export const getShoppingItemByIdController = async (
   try {
     const id = req.params.id as string;
 
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid ID format",
+      }
+      );
+    }
+
     const result = await getShoppingItemById(id);
 
     if (result.status === "error") {
-      if (result.message === "Invalid ID format") {
-        return res.status(400).json(result);
-      }
-
       if (result.message === "Shopping item not found") {
         return res.status(404).json(result);
       }

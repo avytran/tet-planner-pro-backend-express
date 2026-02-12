@@ -41,3 +41,29 @@ export const getShoppingItemById = async (
     };
   }
 };
+
+export const deleteShoppingItem = async (id: string): Promise<DbResult<object> | null> => {
+  try {
+    const result = await ShoppingItemModel.deleteOne({ _id: id });
+
+    if (result.deletedCount === 0) {
+      return {
+        status: "error",
+        message: "Shopping item not found",
+      };
+    }
+
+    return {
+      status: "success",
+      data: {
+        "message": "Shopping item deleted successfully"
+      }
+    }
+  } catch (error) {
+    console.error("deleteShoppingItem error:", error);
+    return {
+      status: "error",
+      message: "Internal server error",
+    };
+  }
+}

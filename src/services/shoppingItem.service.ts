@@ -94,3 +94,23 @@ export const createShoppingItem = async (item: ShoppingItem): Promise<DbResult<S
     };
   }
 }
+
+export const updateAllFieldsOfShoppingItem = async (id: string, item: ShoppingItem): Promise<DbResult<ShoppingItem> | null> => {
+  try {
+    const result = await ShoppingItemModel.updateOne({ _id: id }, { $set: item });
+
+    return {
+      status: "success",
+      data: {
+        id,
+        ...item
+      }
+    }
+  } catch (error) {
+    console.error("createShoppingItem error:", error);
+    return {
+      status: "error",
+      message: "Internal server error",
+    };
+  }
+}

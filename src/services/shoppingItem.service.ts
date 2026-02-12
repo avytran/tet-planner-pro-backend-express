@@ -1,5 +1,3 @@
-import { ObjectId } from "mongodb";
-
 import ShoppingItemModel from "../database/models/shoppingItem.model";
 import { DbResult } from "../types/dbResult";
 import { ShoppingItem } from "../types/shoppingItem";
@@ -61,6 +59,35 @@ export const deleteShoppingItem = async (id: string): Promise<DbResult<object> |
     }
   } catch (error) {
     console.error("deleteShoppingItem error:", error);
+    return {
+      status: "error",
+      message: "Internal server error",
+    };
+  }
+}
+
+export const createShoppingItem = async (item: ShoppingItem): Promise<DbResult<ShoppingItem> | null> => {
+  try {
+    const result = await ShoppingItemModel.insertOne(item);
+
+    return {
+      status: "success",
+      data: {
+        id: result._id,
+        budget_id: result.budget_id,
+        task_id: result.task_id,
+        name: result.name,
+        price: result.price,
+        status: result.status,
+        quantity: result.quantity,
+        dued_time: result.dued_time,
+        timeline: result.timeline,
+        created_at: result.created_at,
+        updated_at: result.updated_at
+      }
+    }
+  } catch (error) {
+    console.error("createShoppingItem error:", error);
     return {
       status: "error",
       message: "Internal server error",

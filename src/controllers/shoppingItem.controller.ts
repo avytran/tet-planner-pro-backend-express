@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { Request, Response } from "express";
-import { getShoppingItemById, deleteShoppingItem } from "../services/shoppingItem.service";
+import { getShoppingItemById, deleteShoppingItem, createShoppingItem } from "../services/shoppingItem.service";
 
 export const getShoppingItemByIdController = async (
   req: Request,
@@ -73,3 +73,28 @@ export const deleteShoppingItemController = async (
     });
   }
 };
+
+export const createShoppingItemController = async (
+  req: Request,
+  res: Response
+) => {
+  const item = req.body;
+
+  try {
+    const result = await createShoppingItem(item);
+    
+    if (result.status === "error") {
+      return res.status(500).json(result);
+    }
+
+    return res.status(201).json(result);
+    
+  } catch (error) {
+    console.error("Controller Error:", error);
+
+    return res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
+}

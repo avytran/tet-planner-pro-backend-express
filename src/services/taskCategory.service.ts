@@ -5,7 +5,11 @@ import { ITaskCategory } from "../database/models/taskCategory.model";
 export interface CreateTaskCategoryInput {
   user_id: string;
   name: string;
-  }
+}
+
+export interface UpdateTaskCategoryInput {
+  name: string;
+}
   
   export const createTaskCategory = async (
     payload: CreateTaskCategoryInput
@@ -67,6 +71,42 @@ export const getTaskCategoryByIdForUser = async (
       status: "error",
       message:
         error instanceof Error ? error.message : "Failed to get task category",
+    };
+  }
+};
+
+export const updateTaskCategory = async (
+  user_id: string,
+  categoryId: string,
+  payload: UpdateTaskCategoryInput
+): Promise<DbResult<ITaskCategory | null>> => {
+  try {
+    const taskCategory = await TaskCategoryModel.findOneAndUpdate(
+      {
+        _id: categoryId,
+        user_id,
+      },
+      { name: payload.name },
+      { new: true, runValidators: true }
+    );
+
+    if (!taskCategory) {
+      return {
+        status: "error",
+        message: "Task category not found",
+      };
+    }
+
+    return {
+      status: "success",
+      data: taskCategory,
+    };
+  } catch (error) {
+    console.error("Failed to update task category:", error);
+    return {
+      status: "error",
+      message:
+        error instanceof Error ? error.message : "Failed to update task category",
     };
   }
 };

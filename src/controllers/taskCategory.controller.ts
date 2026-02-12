@@ -3,6 +3,7 @@ import {
   createTaskCategory,
   getTaskCategoriesByUserId,
   getTaskCategoryByIdForUser,
+  updateTaskCategory,
 } from "../services/taskCategory.service";
 
 export const createTaskCategoryHandler = async (
@@ -93,6 +94,51 @@ export const getTaskCategoryByIdHandler = async (
       return res
         .status(404)
         .json({ status: "error", message: "Task category not found" });
+    }
+
+    return res.status(200).json(taskCategoryResult);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const updateTaskCategoryHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { categoryId } = req.params;
+    const user_id = req.query.user_id;
+    const { name } = req.body;
+
+    if (typeof categoryId !== "string" || !categoryId) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "categoryId is required" });
+    }
+
+    if (typeof user_id !== "string" || !user_id) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "user_id is required" });
+    }
+
+    if (!name || typeof name !== "string") {
+      return res
+        .status(400)
+        .json({ status: "error", message: "name is required" });
+    }
+
+    const taskCategoryResult = await updateTaskCategory(user_id, categoryId, {
+      name,
+    });
+
+    if (taskCategoryResult.status === "error") {
+      if (taskCategoryResult.message === "Task category not found") {
+        return res.status(404).json(taskCategoryResult);
+      }
+      return res.status(500).json(taskCategoryResult);
     }
 
     return res.status(200).json(taskCategoryResult);

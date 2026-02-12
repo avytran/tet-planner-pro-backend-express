@@ -110,3 +110,34 @@ export const updateTaskCategory = async (
     };
   }
 };
+
+export const deleteTaskCategory = async (
+  user_id: string,
+  categoryId: string
+): Promise<DbResult<null>> => {
+  try {
+    const taskCategory = await TaskCategoryModel.findOneAndDelete({
+      _id: categoryId,
+      user_id,
+    });
+
+    if (!taskCategory) {
+      return {
+        status: "error",
+        message: "Task category not found",
+      };
+    }
+
+    return {
+      status: "success",
+      data: null,
+    };
+  } catch (error) {
+    console.error("Failed to delete task category:", error);
+    return {
+      status: "error",
+      message:
+        error instanceof Error ? error.message : "Failed to delete task category",
+    };
+  }
+};

@@ -4,6 +4,7 @@ import {
   getTaskCategoriesByUserId,
   getTaskCategoryByIdForUser,
   updateTaskCategory,
+  deleteTaskCategory,
 } from "../services/taskCategory.service";
 
 export const createTaskCategoryHandler = async (
@@ -142,6 +143,45 @@ export const updateTaskCategoryHandler = async (
     }
 
     return res.status(200).json(taskCategoryResult);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const deleteTaskCategoryHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { categoryId } = req.params;
+    const user_id = req.query.user_id;
+
+    if (typeof categoryId !== "string" || !categoryId) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "categoryId is required" });
+    }
+
+    if (typeof user_id !== "string" || !user_id) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "user_id is required" });
+    }
+
+    const taskCategoryResult = await deleteTaskCategory(user_id, categoryId);
+
+    if (taskCategoryResult.status === "error") {
+      if (taskCategoryResult.message === "Task category not found") {
+        return res.status(404).json(taskCategoryResult);
+      }
+      return res.status(500).json(taskCategoryResult);
+    }
+
+    return res.status(200).json({
+      status: "success",
+      message: "Task category deleted successfully",
+    });
   } catch (error) {
     return next(error);
   }

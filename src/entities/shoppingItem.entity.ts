@@ -19,7 +19,6 @@ const basedShoppingItemAjvSchema = {
     status: {
       type: "string",
       enum: STATUS_ENUM as any,
-      nullable: true,
     },
   }
 };
@@ -35,3 +34,25 @@ export const UpdatingAllFieldShoppingItemAjvSchema = {
   required: ["budget_id", "task_id", "name", "quantity", "price", "dued_time", "timeline", "status"],
   additionalProperties: false,
 };
+
+export const GettingShoppingItemAjvSchema = {
+  type: "object",
+  properties: {
+    ...basedShoppingItemAjvSchema.properties,
+
+    keyword: { type: "string" },
+
+    sort_by: {
+      type: "string",
+      enum: ["price", "quantity", "dued_time", "created_at"]
+    },
+    sort_order: {
+      type: "string",
+      enum: ["asc", "desc"]
+    },
+
+    page: { type: "integer", minimum: 1 },
+    page_size: { type: "integer", minimum: 1, maximum: 100 }
+  },
+  additionalProperties: false
+}

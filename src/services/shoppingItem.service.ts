@@ -1,6 +1,8 @@
+import mongoose from "mongoose";
+
 import ShoppingItemModel from "../database/models/shoppingItem.model";
 import { DbResult } from "../types/dbResult";
-import { ShoppingItem } from "../types/shoppingItem";
+import { ShoppingItem, ShoppingItemQuery } from "../types/shoppingItem";
 
 export const getShoppingItemById = async (
   id: string
@@ -39,6 +41,76 @@ export const getShoppingItemById = async (
     };
   }
 };
+
+export const getShoppingItems = async (query: ShoppingItemQuery): Promise<DbResult<object> | null> => {
+  const {
+    category,
+    timeline,
+    budget_id,
+    task_id,
+    dueDate,
+    status,
+    keyword,
+    sort_by = "created_at",
+    sort_order = "desc",
+    page = 1,
+    page_size = 10
+  } = query;
+
+  const filter: any = {};
+
+  // Filters
+  if (category) filter.category = category;
+  if (timeline) filter.timeline = timeline;
+  if (status) filter.status = status;
+
+  if (budget_id && mongoose.Types.ObjectId.isValid(budget_id)) {
+    filter.budget_id = new mongoose.Types.ObjectId(budget_id);
+  }
+
+  if (task_id && mongoose.Types.ObjectId.isValid(task_id)) {
+    filter.task_id = new mongoose.Types.ObjectId(task_id);
+  }
+
+  if (dueDate) {
+    const start = new Date(dueDate);
+    const end = new Date(dueDate);
+    end.setHours(23, 59, 59, 999);
+    filter.dued_time = { $gte: start, $lte: end };
+  }
+
+  // Search keyword
+  if (keyword) {
+    filter.name = { $regex: keyword, $options: "i" };
+  }
+
+  // Sort
+  const sort: any = {};
+  sort[sort_by] = sort_order === "asc" ? 1 : -1;
+
+  const skip = (page - 1) * page_size;
+
+  const [items, total] = await Promise.all([
+    ShoppingItemModel.find(filter)
+      .sort(sort)
+      .skip(skip)
+      .limit(Number(page_size)),
+    ShoppingItemModel.countDocuments(filter)
+  ]);
+
+  return {
+    status: "success",
+    data: {
+      items,
+      pagination: {
+        total,
+        page: Number(page),
+        page_size: Number(page_size),
+        total_pages: Math.ceil(total / page_size)
+      }
+    }
+  };
+}
 
 export const deleteShoppingItem = async (id: string): Promise<DbResult<object> | null> => {
   try {

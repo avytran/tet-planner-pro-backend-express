@@ -16,3 +16,17 @@ export interface ShoppingItem {
   created_at: Date;
   updated_at: Date;
 }
+
+export interface ShoppingItemQuery {
+  category?: string;
+  timeline?: string;
+  budget_id?: string;
+  task_id?: string;
+  dueDate?: string;
+  status?: string;
+  keyword?: string;
+  sort_by?: string;
+  sort_order?: string;
+  page?: number;
+  page_size?: number;
+}

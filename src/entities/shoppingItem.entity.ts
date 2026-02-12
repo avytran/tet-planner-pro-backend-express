@@ -1,7 +1,7 @@
 const TIMELINE_ENUM = ["Before Tet", "30 Tet", "Mung 1-3"];
 const STATUS_ENUM = ["Planning", "Completed"];
 
-export const CreatingShoppingItemAjvSchema = {
+const basedShoppingItemAjvSchema = {
   type: "object",
   properties: {
     budget_id: { type: "string" },
@@ -21,9 +21,17 @@ export const CreatingShoppingItemAjvSchema = {
       enum: STATUS_ENUM as any,
       nullable: true,
     },
-  },
-  required: ["budget_id", "task_id", "name", "quantity", "price", "dued_time", "timeline"],
+  }
+};
+
+export const CreatingShoppingItemAjvSchema = {
+  ...basedShoppingItemAjvSchema,
+  required: ["budget_id", "task_id", "name", "quantity", "price", "dued_time", "timeline", "status"],
   additionalProperties: false,
 };
 
-export const UpdatingAllFieldShoppingItemAjvSchema = CreatingShoppingItemAjvSchema;
+export const UpdatingAllFieldShoppingItemAjvSchema = {
+  ...basedShoppingItemAjvSchema,
+  required: ["budget_id", "task_id", "name", "quantity", "price", "dued_time", "timeline", "status"],
+  additionalProperties: false,
+};

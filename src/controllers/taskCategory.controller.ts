@@ -1,5 +1,9 @@
 import { Request, Response, NextFunction } from "express";
-import { createTaskCategory, getTaskCategoriesByUserId } from "../services/taskCategory.service";
+import {
+  createTaskCategory,
+  getTaskCategoriesByUserId,
+  getTaskCategoryByIdForUser,
+} from "../services/taskCategory.service";
 
 export const createTaskCategoryHandler = async (
   req: Request,
@@ -34,9 +38,9 @@ export const getTaskCategoriesHandler = async (
   next: NextFunction
 ) => {
   try {
-    const { user_id } = req.query;
+    const user_id = req.query.user_id;
 
-    if (!user_id || typeof user_id !== "string") {
+    if (typeof user_id !== "string" || !user_id) {
       return res.status(400).json({ 
         status: "error", 
         message: "user_id is required" 
@@ -50,6 +54,48 @@ export const getTaskCategoriesHandler = async (
     }
 
     return res.status(200).json(taskCategoriesResult);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const getTaskCategoryByIdHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const categoryId = req.params.categoryId;
+    const user_id = req.query.user_id;
+
+    if (typeof categoryId !== "string" || !categoryId) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "categoryId is required" });
+    }
+
+    if (typeof user_id !== "string" || !user_id) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "user_id is required" });
+    }
+
+    const taskCategoryResult = await getTaskCategoryByIdForUser(
+      user_id,
+      categoryId
+    );
+
+    if (taskCategoryResult.status === "error") {
+      return res.status(500).json(taskCategoryResult);
+    }
+
+    if (!taskCategoryResult.data) {
+      return res
+        .status(404)
+        .json({ status: "error", message: "Task category not found" });
+    }
+
+    return res.status(200).json(taskCategoryResult);
   } catch (error) {
     return next(error);
   }

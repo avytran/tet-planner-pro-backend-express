@@ -46,3 +46,27 @@ export const getTaskCategoriesByUserId = async (
     };
   }
 };
+
+export const getTaskCategoryByIdForUser = async (
+  user_id: string,
+  categoryId: string
+): Promise<DbResult<ITaskCategory | null>> => {
+  try {
+    const taskCategory = await TaskCategoryModel.findOne({
+      _id: categoryId,
+      user_id,
+    });
+
+    return {
+      status: "success",
+      data: taskCategory,
+    };
+  } catch (error) {
+    console.error("Failed to get task category:", error);
+    return {
+      status: "error",
+      message:
+        error instanceof Error ? error.message : "Failed to get task category",
+    };
+  }
+};

@@ -26,3 +26,23 @@ export interface CreateTaskCategoryInput {
       };
     }
   };
+
+export const getTaskCategoriesByUserId = async (
+  user_id: string
+): Promise<DbResult<ITaskCategory[]>> => {
+  try {
+    const taskCategories = await TaskCategoryModel.find({ user_id });
+
+    return {
+      status: "success",
+      data: taskCategories,
+    };
+  } catch (error) {
+    console.error("Failed to get task categories:", error);
+    return {
+      status: "error",
+      message:
+        error instanceof Error ? error.message : "Failed to get task categories",
+    };
+  }
+};

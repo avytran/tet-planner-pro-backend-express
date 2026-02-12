@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { createTaskCategory } from "../services/taskCategory.service";
+import { createTaskCategory, getTaskCategoriesByUserId } from "../services/taskCategory.service";
 
 export const createTaskCategoryHandler = async (
   req: Request,
@@ -23,6 +23,33 @@ export const createTaskCategoryHandler = async (
     }
 
     return res.status(201).json(taskCategoryResult);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const getTaskCategoriesHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { user_id } = req.query;
+
+    if (!user_id || typeof user_id !== "string") {
+      return res.status(400).json({ 
+        status: "error", 
+        message: "user_id is required" 
+      });
+    }
+
+    const taskCategoriesResult = await getTaskCategoriesByUserId(user_id);
+
+    if (taskCategoriesResult.status === "error") {
+      return res.status(500).json(taskCategoriesResult);
+    }
+
+    return res.status(200).json(taskCategoriesResult);
   } catch (error) {
     return next(error);
   }

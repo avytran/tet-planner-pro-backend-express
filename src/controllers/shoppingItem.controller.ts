@@ -11,6 +11,10 @@ export const getShoppingItemByIdController = async (
     const result = await getShoppingItemById(id);
 
     if (result.status === "error") {
+      if (result.message === "Invalid ID format") {
+        return res.status(400).json(result);
+      }
+
       if (result.message === "Shopping item not found") {
         return res.status(404).json(result);
       }

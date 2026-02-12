@@ -1,9 +1,7 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 import { Timeline, ShoppingStatus } from "../../types/shoppingItem";
-import { v4 as uuidv4 } from "uuid";
 
 export interface IShoppingItem extends Document {
-  id: string;
   budget_id: string;
   task_id: string;
   name: string;
@@ -18,13 +16,6 @@ export interface IShoppingItem extends Document {
 
 const ShoppingItemSchema: Schema<IShoppingItem> = new Schema(
   {
-    id: {
-      type: String,
-      default: () => uuidv4(),
-      unique: true,
-      index: true,
-    },
-
     budget_id: {
       type: String,
       required: true,
@@ -60,7 +51,7 @@ const ShoppingItemSchema: Schema<IShoppingItem> = new Schema(
 
     timeline: {
       type: String,
-      enum: ["BeforeTet", "30Tet", "Mung1-3"],
+      enum: ["Before Tet", "30 Tet", "Mung1-3"],
       required: true,
     },
 
@@ -77,6 +68,6 @@ const ShoppingItemSchema: Schema<IShoppingItem> = new Schema(
 
 const ShoppingItemModel: Model<IShoppingItem> =
   mongoose.models.ShoppingItem ||
-  mongoose.model<IShoppingItem>("ShoppingItem", ShoppingItemSchema);
+  mongoose.model<IShoppingItem>("shopping_items", ShoppingItemSchema);
 
 export default ShoppingItemModel;

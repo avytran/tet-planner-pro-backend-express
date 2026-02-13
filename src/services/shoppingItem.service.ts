@@ -20,9 +20,9 @@ export const getShoppingItemById = async (
     return {
       status: "success",
       data: {
-        id: item._id,
-        budget_id: item.budget_id,
-        task_id: item.task_id,
+        id: item._id.toString(),
+        budget_id: item.budget_id.toString(),
+        task_id: item.task_id.toString(),
         name: item.name,
         price: item.price,
         status: item.status,
@@ -44,11 +44,10 @@ export const getShoppingItemById = async (
 
 export const getShoppingItems = async (query: ShoppingItemQuery): Promise<DbResult<object> | null> => {
   const {
-    category,
-    timeline,
     budget_id,
     task_id,
-    dueDate,
+    timeline,
+    dued_date,
     status,
     keyword,
     sort_by = "created_at",
@@ -60,7 +59,6 @@ export const getShoppingItems = async (query: ShoppingItemQuery): Promise<DbResu
   const filter: any = {};
 
   // Filters
-  if (category) filter.category = category;
   if (timeline) filter.timeline = timeline;
   if (status) filter.status = status;
 
@@ -72,9 +70,9 @@ export const getShoppingItems = async (query: ShoppingItemQuery): Promise<DbResu
     filter.task_id = new mongoose.Types.ObjectId(task_id);
   }
 
-  if (dueDate) {
-    const start = new Date(dueDate);
-    const end = new Date(dueDate);
+  if (dued_date) {
+    const start = new Date(dued_date);
+    const end = new Date(dued_date);
     end.setHours(23, 59, 59, 999);
     filter.dued_time = { $gte: start, $lte: end };
   }
@@ -140,14 +138,17 @@ export const deleteShoppingItem = async (id: string): Promise<DbResult<object> |
 
 export const createShoppingItem = async (item: ShoppingItem): Promise<DbResult<ShoppingItem> | null> => {
   try {
-    const result = await ShoppingItemModel.insertOne(item);
+    const budget_id = new mongoose.Types.ObjectId(item.budget_id);
+    const task_id = new mongoose.Types.ObjectId(item.task_id);
+
+    const result = await ShoppingItemModel.insertOne({ ...item, budget_id, task_id });
 
     return {
       status: "success",
       data: {
-        id: result._id,
-        budget_id: result.budget_id,
-        task_id: result.task_id,
+        id: result._id.toString(),
+        budget_id: result.budget_id.toString(),
+        task_id: result.task_id.toString(),
         name: result.name,
         price: result.price,
         status: result.status,

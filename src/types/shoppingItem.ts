@@ -4,7 +4,7 @@ export type Timeline = "Before Tet" | "30 Tet" | "Mung 1-3";
 export type ShoppingStatus = "Planning" | "Completed";
 
 export interface ShoppingItem {
-  id: ObjectId;
+  id: string;
   budget_id: string;
   task_id: string;
   name: string;
@@ -18,11 +18,10 @@ export interface ShoppingItem {
 }
 
 export interface ShoppingItemQuery {
-  category?: string;
-  timeline?: string;
   budget_id?: string;
   task_id?: string;
-  dueDate?: string;
+  timeline?: string;
+  dued_date?: string;
   status?: string;
   keyword?: string;
   sort_by?: string;

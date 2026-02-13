@@ -1,9 +1,10 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
+import { ObjectId } from "mongodb";
 import { Timeline, ShoppingStatus } from "../../types/shoppingItem";
 
 export interface IShoppingItem extends Document {
-  budget_id: string;
-  task_id: string;
+  budget_id: ObjectId;
+  task_id: ObjectId;
   name: string;
   quantity: number;
   price: number;
@@ -17,13 +18,15 @@ export interface IShoppingItem extends Document {
 const ShoppingItemSchema: Schema<IShoppingItem> = new Schema(
   {
     budget_id: {
-      type: String,
+      type: ObjectId,
       required: true,
+      ref: "Budget",
     },
 
     task_id: {
-      type: String,
+      type: ObjectId,
       required: true,
+      ref: "Task",
     },
 
     name: {

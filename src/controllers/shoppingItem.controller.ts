@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { Request, Response } from "express";
 import { getShoppingItemById, getShoppingItems, deleteShoppingItem, createShoppingItem, updateAllFieldsOfShoppingItem } from "../services/shoppingItem.service";
+import { checkValidId } from "../utils/db.util";
 
 export const getShoppingItemByIdController = async (
   req: Request,
@@ -9,7 +10,7 @@ export const getShoppingItemByIdController = async (
   try {
     const id = req.params.id as string;
 
-    if (!ObjectId.isValid(id)) {
+    if (!checkValidId(id)) {
       return res.status(400).json({
         status: "error",
         message: "Invalid ID format",

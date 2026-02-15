@@ -7,9 +7,10 @@ export const getShoppingItemByIdController = async (
   res: Response
 ) => {
   try {
-    const id = req.params.id as string;
+    const itemId = req.params.id as string;
+    const userId = req.user.id as string;
 
-    if (!checkValidId(id)) {
+    if (!checkValidId(itemId) || !checkValidId(userId)) {
       return res.status(400).json({
         status: "error",
         message: "Invalid request",
@@ -17,7 +18,7 @@ export const getShoppingItemByIdController = async (
       );
     }
 
-    const result = await getShoppingItemById(id);
+    const result = await getShoppingItemById(itemId, userId);
 
     if (result.status === "error") {
       if (result.message === "Shopping item not found") {
@@ -45,7 +46,17 @@ export const getShoppingItemsController = async (
   const query = req.query;
 
   try {
-    const result = await getShoppingItems(query);
+    const userId = req.user.id as string;
+
+    if (!checkValidId(userId)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid request",
+      }
+      );
+    }
+
+    const result = await getShoppingItems(query, userId);
 
     if (result.status === "error") {
       return res.status(500).json(result);
@@ -67,9 +78,10 @@ export const deleteShoppingItemController = async (
   res: Response
 ) => {
   try {
-    const id = req.params.id as string;
+    const itemId = req.params.id as string;
+    const userId = req.user.id as string;
 
-    if (!checkValidId(id)) {
+    if (!checkValidId(itemId) || !checkValidId(userId)) {
       return res.status(400).json({
         status: "error",
         message: "Invalid request",
@@ -77,7 +89,7 @@ export const deleteShoppingItemController = async (
       );
     }
 
-    const result = await deleteShoppingItem(id);
+    const result = await deleteShoppingItem(itemId, userId);
 
     if (result.status === "error") {
       if (result.message === "Shopping item not found") {
@@ -105,7 +117,9 @@ export const createShoppingItemController = async (
   const item = req.body;
 
   try {
-    if (!checkValidId(item.budgetId) || !checkValidId(item.taskId)) {
+    const userId = req.user.id as string;
+
+    if (!checkValidId(item.budgetId) || !checkValidId(item.taskId) || !checkValidId(userId)) {
       return res.status(400).json({
         status: "error",
         message: "Invalid request",
@@ -113,9 +127,12 @@ export const createShoppingItemController = async (
       );
     }
 
-    const result = await createShoppingItem(item);
+    const result = await createShoppingItem(item, userId);
 
     if (result.status === "error") {
+      if (result.message === "Budget does not belong to user") {
+        return res.status(400).json(result);
+      }
       return res.status(500).json(result);
     }
 
@@ -135,11 +152,12 @@ export const updateAllFieldsOfShoppingItemController = async (
   req: Request,
   res: Response
 ) => {
-  const id = req.params.id as string;
+  const itemId = req.params.id as string;
   const item = req.body;
+  const userId = req.user.id as string;
 
   try {
-    if (!checkValidId(item.budgetId) || !checkValidId(item.taskId)) {
+    if (!checkValidId(item.budgetId) || !checkValidId(item.taskId) || !checkValidId(userId)) {
       return res.status(400).json({
         status: "error",
         message: "Invalid request",
@@ -147,9 +165,17 @@ export const updateAllFieldsOfShoppingItemController = async (
       );
     }
 
-    const result = await updateAllFieldsOfShoppingItem(id, item);
+    const result = await updateAllFieldsOfShoppingItem(itemId, item, userId);
 
     if (result.status === "error") {
+      if (result.message === "Budget does not belong to user") {
+        return res.status(400).json(result);
+      }
+
+      if (result.message === "Shopping item not found") {
+        return res.status(404).json(result);
+      }
+
       return res.status(500).json(result);
     }
 

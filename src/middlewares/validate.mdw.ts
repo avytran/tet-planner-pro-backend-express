@@ -15,7 +15,7 @@ export default function (schema) {
             console.log(ajv.errors);
             return res.status(400).json({
                 "status": "error",
-                "message": "Invalid input data"
+                "message": "Invalid request"
             })
         }
 

@@ -54,7 +54,7 @@ const ShoppingItemSchema: Schema<IShoppingItem> = new Schema(
 
     timeline: {
       type: String,
-      enum: ["Before Tet", "30 Tet", "Mung1-3"],
+      enum: ["Pre Tet", "During Tet", "After Tet"],
       required: true,
     },
 
@@ -65,7 +65,10 @@ const ShoppingItemSchema: Schema<IShoppingItem> = new Schema(
     },
   },
   {
-    timestamps: true, 
+    timestamps: {
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+    }
   }
 );
 

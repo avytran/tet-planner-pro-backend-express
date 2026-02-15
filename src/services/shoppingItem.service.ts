@@ -21,16 +21,16 @@ export const getShoppingItemById = async (
       status: "success",
       data: {
         id: item._id.toString(),
-        budget_id: item.budget_id.toString(),
-        task_id: item.task_id.toString(),
+        budgetId: item.budget_id.toString(),
+        taskId: item.task_id.toString(),
         name: item.name,
         price: item.price,
         status: item.status,
         quantity: item.quantity,
-        dued_time: item.dued_time,
+        duedTime: item.dued_time,
         timeline: item.timeline,
-        created_at: item.created_at,
-        updated_at: item.updated_at
+        createdAt: item.created_at,
+        updatedAt: item.updated_at
       },
     };
   } catch (error) {
@@ -42,18 +42,18 @@ export const getShoppingItemById = async (
   }
 };
 
-export const getShoppingItems = async (query: ShoppingItemQuery): Promise<DbResult<object> | null> => {
+export const getShoppingItems = async (query: ShoppingItemQuery): Promise<DbResult<object>> => {
   const {
-    budget_id,
-    task_id,
+    budgetId,
+    taskId,
     timeline,
-    dued_date,
+    duedTime,
     status,
     keyword,
-    sort_by = "created_at",
-    sort_order = "desc",
+    sortBy = "created_at",
+    sortOrder = "desc",
     page = 1,
-    page_size = 10
+    pageSize = 10
   } = query;
 
   const filter: any = {};
@@ -62,17 +62,17 @@ export const getShoppingItems = async (query: ShoppingItemQuery): Promise<DbResu
   if (timeline) filter.timeline = timeline;
   if (status) filter.status = status;
 
-  if (budget_id && mongoose.Types.ObjectId.isValid(budget_id)) {
-    filter.budget_id = new mongoose.Types.ObjectId(budget_id);
+  if (budgetId && mongoose.Types.ObjectId.isValid(budgetId)) {
+    filter.budget_id = new mongoose.Types.ObjectId(budgetId);
   }
 
-  if (task_id && mongoose.Types.ObjectId.isValid(task_id)) {
-    filter.task_id = new mongoose.Types.ObjectId(task_id);
+  if (taskId && mongoose.Types.ObjectId.isValid(taskId)) {
+    filter.task_id = new mongoose.Types.ObjectId(taskId);
   }
 
-  if (dued_date) {
-    const start = new Date(dued_date);
-    const end = new Date(dued_date);
+  if (duedTime) {
+    const start = new Date(duedTime);
+    const end = new Date(duedTime);
     end.setHours(23, 59, 59, 999);
     filter.dued_time = { $gte: start, $lte: end };
   }
@@ -84,33 +84,45 @@ export const getShoppingItems = async (query: ShoppingItemQuery): Promise<DbResu
 
   // Sort
   const sort: any = {};
-  sort[sort_by] = sort_order === "asc" ? 1 : -1;
+  sort[sortBy] = sortOrder === "asc" ? 1 : -1;
 
-  const skip = (page - 1) * page_size;
+  const skip = (page - 1) * pageSize;
 
-  const [items, total] = await Promise.all([
+  const [items, totalItems] = await Promise.all([
     ShoppingItemModel.find(filter)
       .sort(sort)
       .skip(skip)
-      .limit(Number(page_size)),
+      .limit(Number(pageSize)),
     ShoppingItemModel.countDocuments(filter)
   ]);
+
+  const result = items.map(item => ({
+    id: item._id.toString(),
+    budgetId: item.budget_id.toString(),
+    taskId: item.task_id.toString(),
+    name: item.name,
+    price: item.price,
+    status: item.status,
+    quantity: item.quantity,
+    duedTime: item.dued_time,
+    timeline: item.timeline,
+    createdAt: item.created_at,
+    updatedAt: item.updated_at
+  }))
 
   return {
     status: "success",
     data: {
-      items,
-      pagination: {
-        total,
-        page: Number(page),
-        page_size: Number(page_size),
-        total_pages: Math.ceil(total / page_size)
-      }
+      page: Number(page),
+      pageSize: Number(pageSize),
+      totalItems,
+      totalPages: Math.ceil(totalItems / pageSize),
+      items: result
     }
   };
 }
 
-export const deleteShoppingItem = async (id: string): Promise<DbResult<object> | null> => {
+export const deleteShoppingItem = async (id: string): Promise<DbResult<object>> => {
   try {
     const result = await ShoppingItemModel.deleteOne({ _id: id });
 
@@ -136,27 +148,36 @@ export const deleteShoppingItem = async (id: string): Promise<DbResult<object> |
   }
 }
 
-export const createShoppingItem = async (item: ShoppingItem): Promise<DbResult<ShoppingItem> | null> => {
+export const createShoppingItem = async (item: ShoppingItem): Promise<DbResult<ShoppingItem>> => {
   try {
-    const budget_id = new mongoose.Types.ObjectId(item.budget_id);
-    const task_id = new mongoose.Types.ObjectId(item.task_id);
+    const budgetObjectId = new mongoose.Types.ObjectId(item.budgetId);
+    const taskObjectId = new mongoose.Types.ObjectId(item.taskId);
 
-    const result = await ShoppingItemModel.insertOne({ ...item, budget_id, task_id });
+    const result = await ShoppingItemModel.insertOne({
+      budget_id: budgetObjectId,
+      task_id: taskObjectId,
+      name: item.name,
+      price: item.price,
+      status: item.status,
+      quantity: item.quantity,
+      dued_time: item.duedTime,
+      timeline: item.timeline,
+    });
 
     return {
       status: "success",
       data: {
         id: result._id.toString(),
-        budget_id: result.budget_id.toString(),
-        task_id: result.task_id.toString(),
+        budgetId: result.budget_id.toString(),
+        taskId: result.task_id.toString(),
         name: result.name,
         price: result.price,
         status: result.status,
         quantity: result.quantity,
-        dued_time: result.dued_time,
+        duedTime: result.dued_time,
         timeline: result.timeline,
-        created_at: result.created_at,
-        updated_at: result.updated_at
+        createdAt: result.created_at,
+        updatedAt: result.updated_at
       }
     }
   } catch (error) {
@@ -168,19 +189,27 @@ export const createShoppingItem = async (item: ShoppingItem): Promise<DbResult<S
   }
 }
 
-export const updateAllFieldsOfShoppingItem = async (
-  id: string,
-  payload: Partial<ShoppingItem>
-): Promise<DbResult<ShoppingItem>> => {
+export const updateAllFieldsOfShoppingItem = async (id: string, payload: Partial<ShoppingItem>): Promise<DbResult<ShoppingItem>> => {
   try {
 
-    const taskObjectId = new mongoose.Types.ObjectId(payload.task_id);
-    const budgetObjectId = new mongoose.Types.ObjectId(payload.budget_id);
+    const budgetObjectId = new mongoose.Types.ObjectId(payload.budgetId);
+    const taskObjectId = new mongoose.Types.ObjectId(payload.taskId);
 
     const updatedItem = await ShoppingItemModel.findByIdAndUpdate(
       id,
-      { $set: { ...payload, task_id: taskObjectId, budget_id: budgetObjectId } },
-      { new: true, runValidators: true }
+      {
+        $set: {
+          task_id: taskObjectId,
+          budget_id: budgetObjectId,
+          name: payload.name,
+          price: payload.price,
+          status: payload.status,
+          quantity: payload.quantity,
+          dued_time: payload.duedTime,
+          timeline: payload.timeline,
+        }
+      },
+      { new: true }
     ).lean();
 
     if (!updatedItem) {
@@ -194,16 +223,16 @@ export const updateAllFieldsOfShoppingItem = async (
       status: "success",
       data: {
         id: updatedItem._id.toString(),
-        budget_id: updatedItem.budget_id.toString(),
-        task_id: updatedItem.task_id.toString(),
+        budgetId: updatedItem.budget_id.toString(),
+        taskId: updatedItem.task_id.toString(),
         name: updatedItem.name,
         price: updatedItem.price,
         status: updatedItem.status,
         quantity: updatedItem.quantity,
-        dued_time: updatedItem.dued_time,
+        duedTime: updatedItem.dued_time,
         timeline: updatedItem.timeline,
-        created_at: updatedItem.created_at,
-        updated_at: updatedItem.updated_at
+        createdAt: updatedItem.created_at,
+        updatedAt: updatedItem.updated_at
       },
     };
   } catch (error) {

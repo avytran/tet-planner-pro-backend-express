@@ -1,8 +1,6 @@
-import { ObjectId } from "mongodb";
 import { Request, Response } from "express";
 import { getShoppingItemById, getShoppingItems, deleteShoppingItem, createShoppingItem, updateAllFieldsOfShoppingItem } from "../services/shoppingItem.service";
 import { checkValidId } from "../utils/db.util";
-import mongoose from "mongoose";
 
 export const getShoppingItemByIdController = async (
   req: Request,
@@ -14,7 +12,7 @@ export const getShoppingItemByIdController = async (
     if (!checkValidId(id)) {
       return res.status(400).json({
         status: "error",
-        message: "Invalid ID format",
+        message: "Invalid request",
       }
       );
     }
@@ -74,7 +72,7 @@ export const deleteShoppingItemController = async (
     if (!checkValidId(id)) {
       return res.status(400).json({
         status: "error",
-        message: "Invalid ID format",
+        message: "Invalid request",
       }
       );
     }
@@ -107,10 +105,10 @@ export const createShoppingItemController = async (
   const item = req.body;
 
   try {
-    if (!checkValidId(item.budget_id) || !checkValidId(item.task_id)) {
+    if (!checkValidId(item.budgetId) || !checkValidId(item.taskId)) {
       return res.status(400).json({
         status: "error",
-        message: "Invalid ID format",
+        message: "Invalid request",
       }
       );
     }
@@ -141,10 +139,10 @@ export const updateAllFieldsOfShoppingItemController = async (
   const item = req.body;
 
   try {
-    if (!checkValidId(item.budget_id) || !checkValidId(item.task_id)) {
+    if (!checkValidId(item.budgetId) || !checkValidId(item.taskId)) {
       return res.status(400).json({
         status: "error",
-        message: "Invalid ID format",
+        message: "Invalid request",
       }
       );
     }

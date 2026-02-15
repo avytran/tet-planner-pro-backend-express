@@ -1,15 +1,15 @@
-const TIMELINE_ENUM = ["Before Tet", "30 Tet", "Mung 1-3"];
+const TIMELINE_ENUM = ["Pre Tet", "During Tet", "After Tet"];
 const STATUS_ENUM = ["Planning", "Completed"];
 
 const basedShoppingItemAjvSchema = {
   type: "object",
   properties: {
-    budget_id: { type: "string" },
-    task_id: { type: "string" },
+    budgetId: { type: "string" },
+    taskId: { type: "string" },
     name: { type: "string", minLength: 1 },
     quantity: { type: "number", minimum: 1 },
     price: { type: "number", minimum: 0 },
-    dued_time: { type: "string", format: "date-time" },
+    duedTime: { type: "string", format: "date-time" },
 
     timeline: {
       type: "string",
@@ -25,13 +25,13 @@ const basedShoppingItemAjvSchema = {
 
 export const CreatingShoppingItemAjvSchema = {
   ...basedShoppingItemAjvSchema,
-  required: ["budget_id", "task_id", "name", "quantity", "price", "dued_time", "timeline", "status"],
+  required: ["budgetId", "taskId", "name", "quantity", "price", "duedTime", "timeline", "status"],
   additionalProperties: false,
 };
 
 export const UpdatingAllFieldShoppingItemAjvSchema = {
   ...basedShoppingItemAjvSchema,
-  required: ["budget_id", "task_id", "name", "quantity", "price", "dued_time", "timeline", "status"],
+  required: ["budgetId", "taskId", "name", "quantity", "price", "duedTime", "timeline", "status"],
   additionalProperties: false,
 };
 
@@ -42,17 +42,17 @@ export const GettingShoppingItemAjvSchema = {
 
     keyword: { type: "string" },
 
-    sort_by: {
+    sortBy: {
       type: "string",
-      enum: ["price", "quantity", "dued_time", "created_at"]
+      enum: ["price", "quantity", "duedTime", "createdAt"]
     },
-    sort_order: {
+    sortOrder: {
       type: "string",
       enum: ["asc", "desc"]
     },
 
     page: { type: "integer", minimum: 1 },
-    page_size: { type: "integer", minimum: 1, maximum: 100 }
+    pageSize: { type: "integer", minimum: 1, maximum: 100 }
   },
   additionalProperties: false
 }

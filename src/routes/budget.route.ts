@@ -6,9 +6,9 @@ import { CreatingBudgetAjvSchema, UpdatingBudgetAjvSchema } from "../entities/bu
 
 const router = Router();
 
-router.get("/:id", getBudgetByIdController);
+router.get("/:id", mockAuth, getBudgetByIdController);
 router.get("/", mockAuth, getBudgetsController);
-router.delete("/:id", deleteBudgetController);
+router.delete("/:id", mockAuth, deleteBudgetController);
 router.post("/", validate(CreatingBudgetAjvSchema), mockAuth, createBudgetController);
 router.put("/:id", validate(UpdatingBudgetAjvSchema), mockAuth, updateBudgetController);
 

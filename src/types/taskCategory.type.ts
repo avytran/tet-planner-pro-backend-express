@@ -1,7 +1,18 @@
+import { ObjectId } from "mongodb";
+
 export interface TaskCategory {
   id: string;
-  user_id: string;
+  userId: string;
   name: string;
-  created_at: Date;
-  updated_at: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CreateTaskCategoryInput {
+  user_id: ObjectId;
+  name: string;
+}
+
+export interface UpdateTaskCategoryInput {
+  name: string;
 }

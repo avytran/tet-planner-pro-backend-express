@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 
 import healthRoute from './routes/health.route';
-import taskCategoryRoute from './routes/taskCategory.router';
+import taskCategoryRoute from './routes/taskCategory.route';
 import taskRoute from "./routes/task.route";
 import shoppingItemRoute from './routes/shoppingItem.route';
 import budgetRoute from './routes/budget.route';

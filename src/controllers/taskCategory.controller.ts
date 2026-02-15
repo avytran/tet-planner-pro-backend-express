@@ -6,6 +6,8 @@ import {
   updateTaskCategory,
   deleteTaskCategory,
 } from "../services/taskCategory.service";
+import { checkValidId } from "../utils/db.util";
+import mongoose from "mongoose";
 
 export const createTaskCategoryHandler = async (
   req: Request,
@@ -13,22 +15,28 @@ export const createTaskCategoryHandler = async (
   next: NextFunction
 ) => {
   try {
-    const { user_id, name } = req.body;
+    const { name } = req.body;
+    const userId = req.user.id;
 
-    if (!user_id || !name) {
-      return res.status(400).json({ status: "error", message: "Invalid task category data" });
+    if (!checkValidId(userId)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid ID format",
+      })
     }
 
-    const taskCategoryResult = await createTaskCategory({
-      user_id,
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    const result = await createTaskCategory({
+      user_id: userObjectId,
       name
     });
 
-    if (taskCategoryResult.status === "error") {
-      return res.status(500).json(taskCategoryResult);
+    if (result.status === "error") {
+      return res.status(500).json(result);
     }
 
-    return res.status(201).json(taskCategoryResult);
+    return res.status(201).json(result);
   } catch (error) {
     return next(error);
   }
@@ -40,22 +48,24 @@ export const getTaskCategoriesHandler = async (
   next: NextFunction
 ) => {
   try {
-    const user_id = req.query.user_id;
+    const userId = req.user.id;
 
-    if (typeof user_id !== "string" || !user_id) {
-      return res.status(400).json({ 
-        status: "error", 
-        message: "user_id is required" 
-      });
+    if (!checkValidId(userId)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid ID format",
+      })
     }
 
-    const taskCategoriesResult = await getTaskCategoriesByUserId(user_id);
+    const userObjectId = new mongoose.Types.ObjectId(userId);
 
-    if (taskCategoriesResult.status === "error") {
-      return res.status(500).json(taskCategoriesResult);
+    const result = await getTaskCategoriesByUserId(userObjectId);
+
+    if (result.status === "error") {
+      return res.status(500).json(result);
     }
 
-    return res.status(200).json(taskCategoriesResult);
+    return res.status(200).json(result);
   } catch (error) {
     return next(error);
   }
@@ -67,37 +77,32 @@ export const getTaskCategoryByIdHandler = async (
   next: NextFunction
 ) => {
   try {
-    const categoryId = req.params.categoryId;
-    const user_id = req.query.user_id;
+    const categoryId = req.params.id as string;
+    const userId = req.user.id;
 
-    if (typeof categoryId !== "string" || !categoryId) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "categoryId is required" });
+    if (!checkValidId(userId) || !checkValidId(categoryId)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid ID format",
+      })
     }
 
-    if (typeof user_id !== "string" || !user_id) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "user_id is required" });
-    }
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    const categoryObjectId = new mongoose.Types.ObjectId(categoryId);
 
-    const taskCategoryResult = await getTaskCategoryByIdForUser(
-      user_id,
-      categoryId
+    const result = await getTaskCategoryByIdForUser(
+      userObjectId,
+      categoryObjectId
     );
 
-    if (taskCategoryResult.status === "error") {
-      return res.status(500).json(taskCategoryResult);
+    if (result.status === "error") {
+      if (result.message === "Task category not found") {
+        return res.status(404).json(result);
+      }
+      return res.status(500).json(result);
     }
 
-    if (!taskCategoryResult.data) {
-      return res
-        .status(404)
-        .json({ status: "error", message: "Task category not found" });
-    }
-
-    return res.status(200).json(taskCategoryResult);
+    return res.status(200).json(result);
   } catch (error) {
     return next(error);
   }
@@ -109,29 +114,21 @@ export const updateTaskCategoryHandler = async (
   next: NextFunction
 ) => {
   try {
-    const { categoryId } = req.params;
-    const user_id = req.query.user_id;
+    const categoryId = req.params.id as string;
+    const userId = req.user.id;
     const { name } = req.body;
 
-    if (typeof categoryId !== "string" || !categoryId) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "categoryId is required" });
+    if (!checkValidId(userId) || !checkValidId(categoryId)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid ID format",
+      })
     }
 
-    if (typeof user_id !== "string" || !user_id) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "user_id is required" });
-    }
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    const categoryObjectId = new mongoose.Types.ObjectId(categoryId);
 
-    if (!name || typeof name !== "string") {
-      return res
-        .status(400)
-        .json({ status: "error", message: "name is required" });
-    }
-
-    const taskCategoryResult = await updateTaskCategory(user_id, categoryId, {
+    const taskCategoryResult = await updateTaskCategory(userObjectId, categoryObjectId, {
       name,
     });
 
@@ -154,22 +151,20 @@ export const deleteTaskCategoryHandler = async (
   next: NextFunction
 ) => {
   try {
-    const { categoryId } = req.params;
-    const user_id = req.query.user_id;
+    const categoryId = req.params.id as string;
+    const userId = req.user.id;
 
-    if (typeof categoryId !== "string" || !categoryId) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "categoryId is required" });
+    if (!checkValidId(userId) || !checkValidId(categoryId)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid ID format",
+      })
     }
 
-    if (typeof user_id !== "string" || !user_id) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "user_id is required" });
-    }
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    const categoryObjectId = new mongoose.Types.ObjectId(categoryId);
 
-    const taskCategoryResult = await deleteTaskCategory(user_id, categoryId);
+    const taskCategoryResult = await deleteTaskCategory(userObjectId, categoryObjectId);
 
     if (taskCategoryResult.status === "error") {
       if (taskCategoryResult.message === "Task category not found") {
@@ -180,7 +175,9 @@ export const deleteTaskCategoryHandler = async (
 
     return res.status(200).json({
       status: "success",
-      message: "Task category deleted successfully",
+      data: {
+        message: "Task category deleted successfully"
+      },
     });
   } catch (error) {
     return next(error);

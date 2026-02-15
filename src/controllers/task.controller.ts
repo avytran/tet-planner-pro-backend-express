@@ -12,7 +12,7 @@ import { checkValidId } from "../utils/db.util";
 import { GetTasksFilter, UpdateTaskInput } from "../types/task";
 import mongoose from "mongoose";
 
-export const createTaskHandler = async (
+export const createTaskController = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -49,7 +49,7 @@ export const createTaskHandler = async (
   }
 };
 
-export const getTasksHandler = async (
+export const getTasksController = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -87,7 +87,7 @@ export const getTasksHandler = async (
   }
 };
 
-export const getTaskByIdHandler = async (
+export const getTaskByIdController = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -118,7 +118,7 @@ export const getTaskByIdHandler = async (
   }
 };
 
-export const updateTaskHandler = async (
+export const updateTaskController = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -160,7 +160,7 @@ export const updateTaskHandler = async (
   }
 };
 
-export const patchTaskHandler = async (
+export const patchTaskController = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -220,7 +220,7 @@ export const patchTaskHandler = async (
   }
 };
 
-export const deleteTaskHandler = async (
+export const deleteTaskController = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -239,7 +239,7 @@ export const deleteTaskHandler = async (
     if (result.status === "error") {
       return res.status(500).json(result);
     }
-    
+
     return res.status(200).json(result);
   } catch (error) {
     return next(error);

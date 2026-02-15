@@ -1,23 +1,23 @@
 import { Router } from "express";
 import {
-  createTaskHandler,
-  getTasksHandler,
-  getTaskByIdHandler,
-  updateTaskHandler,
-  patchTaskHandler,
-  deleteTaskHandler,
+  createTaskController,
+  getTasksController,
+  getTaskByIdController,
+  updateTaskController,
+  patchTaskController,
+  deleteTaskController,
 } from "../controllers/task.controller";
 import validate from "../middlewares/validate.mdw";
 import { creatingTaskAjvSchema, updatingTaskAjvSchema, patchingTaskAjvSchema } from "../entities/task.entity";
 
 const router = Router();
 
-router.post("/", validate(creatingTaskAjvSchema), createTaskHandler);
-router.get("/", getTasksHandler);
-router.get("/:id", getTaskByIdHandler);
-router.put("/:id", validate(updatingTaskAjvSchema), updateTaskHandler);
-router.patch("/:id", validate(patchingTaskAjvSchema), patchTaskHandler);
-router.delete("/:id", deleteTaskHandler);
+router.post("/", validate(creatingTaskAjvSchema), createTaskController);
+router.get("/", getTasksController);
+router.get("/:id", getTaskByIdController);
+router.put("/:id", validate(updatingTaskAjvSchema), updateTaskController);
+router.patch("/:id", validate(patchingTaskAjvSchema), patchTaskController);
+router.delete("/:id", deleteTaskController);
 
 export default router;
 

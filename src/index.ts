@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 
 import healthRoute from './routes/health.route';
+import budgetRoute from './routes/budget.route';
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/health', healthRoute);
+app.use('/v1/budgets', budgetRoute);
 
 mongoose.connect(`mongodb+srv://${DB_USERNAME}:${DB_PASSWORD}@tetplannerpro.3yuf5p8.mongodb.net/${DB_NAME}?appName=TetPlannerPro`)
     .then(async () => {

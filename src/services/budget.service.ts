@@ -24,11 +24,11 @@ export const getBudgetById = async (id: string): Promise<DbResult<Budget>> => {
             status: "success",
             data: {
                 id: budget.id.toString(),
-                user_id: budget.user_id.toString(),
+                userId: budget.user_id.toString(),
                 name: budget.name,
-                allocated_amount: budget.allocated_amount,
-                created_at: budget.created_at,
-                updated_at: budget.updated_at,
+                allocatedAmount: budget.allocated_amount,
+                createdAt: budget.created_at,
+                updatedAt: budget.updated_at,
                 summary
             }
         }
@@ -79,11 +79,11 @@ export const getBudgets = async (userId: string): Promise<DbResult<Array<Budget>
         const result = budgets.map(budget => (
             {
                 id: budget.id.toString(),
-                user_id: budget.user_id.toString(),
+                userId: budget.user_id.toString(),
                 name: budget.name,
-                allocated_amount: budget.allocated_amount,
-                created_at: budget.created_at,
-                updated_at: budget.updated_at,
+                allocatedAmount: budget.allocated_amount,
+                createdAt: budget.created_at,
+                updatedAt: budget.updated_at,
                 summary: summaryMap.get(budget._id.toString()) ?? 0
             }
         ));
@@ -131,17 +131,21 @@ export const deleteBudget = async (id: string): Promise<DbResult<object>> => {
 
 export const createBudget = async (payload: BudgetPayload): Promise<DbResult<Budget>> => {
     try {
-        const result = await BudgetModel.insertOne(payload);
+        const result = await BudgetModel.insertOne({
+            user_id: payload.userId,
+            name: payload.name,
+            allocated_amount: payload.allocatedAmount
+        });
 
         return {
             status: "success",
             data: {
-                id: result._id.toString(),
-                user_id: result.user_id.toString(),
+                id: result.id.toString(),
+                userId: result.user_id.toString(),
                 name: result.name,
-                allocated_amount: result.allocated_amount,
-                created_at: result.created_at,
-                updated_at: result.updated_at,
+                allocatedAmount: result.allocated_amount,
+                createdAt: result.created_at,
+                updatedAt: result.updated_at,
             }
         }
     } catch (error) {
@@ -157,7 +161,14 @@ export const updateBudget = async (id: string, payload: BudgetPayload): Promise<
     try {
         const updatedBudget = await BudgetModel.findByIdAndUpdate(
             id,
-            { $set: payload },
+            {
+                $set:
+                {
+                    user_id: payload.userId,
+                    name: payload.name,
+                    allocated_amount: payload.allocatedAmount
+                }
+            },
             { new: true }
         ).lean();
 
@@ -172,11 +183,11 @@ export const updateBudget = async (id: string, payload: BudgetPayload): Promise<
             status: "success",
             data: {
                 id: updatedBudget._id.toString(),
-                user_id: updatedBudget.user_id.toString(),
+                userId: updatedBudget.user_id.toString(),
                 name: updatedBudget.name,
-                allocated_amount: updatedBudget.allocated_amount,
-                created_at: updatedBudget.created_at,
-                updated_at: updatedBudget.updated_at,
+                allocatedAmount: updatedBudget.allocated_amount,
+                createdAt: updatedBudget.created_at,
+                updatedAt: updatedBudget.updated_at,
             },
         };
     } catch (error) {

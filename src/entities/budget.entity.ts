@@ -1,20 +1,20 @@
 const basedBudgetAjvSchema = {
     type: "object",
     properties: {
-        user_id: { type: "string" },
+        userId: { type: "string" },
         name: { type: "string" },
-        allocated_amount: { type: "number", minimum: 0 },
+        allocatedAmount: { type: "number", minimum: 0 },
     }
 }
 
 export const CreatingBudgetAjvSchema = {
     ...basedBudgetAjvSchema,
-    required: ["name", "allocated_amount"],
+    required: ["name", "allocatedAmount"],
     additionalProperties: false,
 }
 
 export const UpdatingBudgetAjvSchema = {
     ...basedBudgetAjvSchema,
-    required: ["name", "allocated_amount"],
+    required: ["name", "allocatedAmount"],
     additionalProperties: false,
 }

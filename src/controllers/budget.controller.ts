@@ -91,18 +91,18 @@ export const deleteBudgetController = async (req: Request, res: Response) => {
 }
 
 export const createBudgetController = async (req: Request, res: Response) => {
-    const { name, allocated_amount } = req.body;
-    const user_id = req.user.id;
+    const { name, allocatedAmount } = req.body;
+    const userId = req.user.id;
 
     try {
-        if (!checkValidId(user_id)) {
+        if (!checkValidId(userId)) {
             return res.status(400).json({
                 status: "error",
                 message: "Invalid ID format",
             })
         }
 
-        const result = await createBudget({ user_id, name, allocated_amount });
+        const result = await createBudget({ userId, name, allocatedAmount });
 
         if (result.status === "error") {
             return res.status(500).json(result);
@@ -119,19 +119,19 @@ export const createBudgetController = async (req: Request, res: Response) => {
 }
 
 export const updateBudgetController = async (req: Request, res: Response) => {
-    const { name, allocated_amount } = req.body;
-    const user_id = req.user.id;
-    const budget_id = req.params.id as string;
+    const { name, allocatedAmount } = req.body;
+    const userId = req.user.id;
+    const budgetId = req.params.id as string;
 
     try {
-        if (!checkValidId(user_id) || !checkValidId(budget_id)) {
+        if (!checkValidId(userId) || !checkValidId(budgetId)) {
             return res.status(400).json({
                 status: "error",
                 message: "Invalid ID format",
             })
         }
 
-        const result = await updateBudget(budget_id, { user_id, name, allocated_amount });
+        const result = await updateBudget(budgetId, { userId, name, allocatedAmount });
 
         if (result.status === "error") {
             if (result.message === "Budget not found") {

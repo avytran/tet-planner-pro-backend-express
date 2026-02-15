@@ -152,3 +152,38 @@ export const createBudget = async (payload: BudgetPayload): Promise<DbResult<Bud
         };
     }
 }
+
+export const updateBudget = async (id: string, payload: BudgetPayload): Promise<DbResult<Budget>> => {
+    try {
+        const updatedBudget = await BudgetModel.findByIdAndUpdate(
+            id,
+            { $set: payload },
+            { new: true }
+        ).lean();
+
+        if (!updatedBudget) {
+            return {
+                status: "error",
+                message: "Budget not found",
+            };
+        }
+
+        return {
+            status: "success",
+            data: {
+                id: updatedBudget._id.toString(),
+                user_id: updatedBudget.user_id.toString(),
+                name: updatedBudget.name,
+                allocated_amount: updatedBudget.allocated_amount,
+                created_at: updatedBudget.created_at,
+                updated_at: updatedBudget.updated_at,
+            },
+        };
+    } catch (error) {
+        console.error("updateBudget error:", error);
+        return {
+            status: "error",
+            message: "Internal server error",
+        };
+    }
+};

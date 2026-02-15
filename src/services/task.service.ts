@@ -1,34 +1,26 @@
 import TaskModel, { ITask } from "../database/models/task.model";
-import { Task, Timeline, Priority, TaskStatus } from "../types/task.types";
+import { Task, CreateTaskInput, UpdateTaskInput, GetTasksFilter } from "../types/task";
 import { DbResult } from "../types/dbResult";
-
-export interface CreateTaskInput {
-  category_id: string;
-  title: string;
-  dued_time: Date | string;
-  timeline: Task["timeline"];
-  priority: Task["priority"];
-  status: Task["status"];
-}
-
-export interface GetTasksFilter {
-  category_id?: string;
-  timeline?: Timeline;
-  priority?: Priority;
-  status?: TaskStatus;
-}
-
-export type UpdateTaskInput = Partial<CreateTaskInput>;
 
 export const createTask = async (
   payload: CreateTaskInput
-): Promise<DbResult<ITask>> => {
+): Promise<DbResult<Task>> => {
   try {
     const task = await TaskModel.create(payload);
 
     return {
       status: "success",
-      data: task,
+      data: {
+        id: task._id.toString(),
+        categoryId: task.category_id.toString(),
+        title: task.title,
+        duedTime: task.dued_time,
+        timeline: task.timeline,
+        priority: task.priority,
+        status: task.status,
+        createdAt: task.created_at,
+        updatedAt: task.updated_at,
+      },
     };
   } catch (error) {
     console.error("Failed to create task:", error);
@@ -42,13 +34,25 @@ export const createTask = async (
 
 export const getTasks = async (
   filter: GetTasksFilter
-): Promise<DbResult<ITask[]>> => {
+): Promise<DbResult<Task[]>> => {
   try {
     const tasks = await TaskModel.find(filter).exec();
 
+    const result = tasks.map(task => ({
+      id: task._id.toString(),
+      categoryId: task.category_id.toString(),
+      title: task.title,
+      duedTime: task.dued_time,
+      timeline: task.timeline,
+      priority: task.priority,
+      status: task.status,
+      createdAt: task.created_at,
+      updatedAt: task.updated_at,
+    }))
+
     return {
       status: "success",
-      data: tasks,
+      data: result,
     };
   } catch (error) {
     console.error("Failed to get tasks:", error);
@@ -60,13 +64,23 @@ export const getTasks = async (
   }
 };
 
-export const getTaskById = async (_id: string): Promise<DbResult<ITask | null>> => {
+export const getTaskById = async (id: string): Promise<DbResult<Task | null>> => {
   try {
-    const task = await TaskModel.findById(_id).exec();
+    const task = await TaskModel.findById(id).exec();
 
     return {
       status: "success",
-      data: task,
+      data: {
+        id: task._id.toString(),
+        categoryId: task.category_id.toString(),
+        title: task.title,
+        duedTime: task.dued_time,
+        timeline: task.timeline,
+        priority: task.priority,
+        status: task.status,
+        createdAt: task.created_at,
+        updatedAt: task.updated_at,
+      },
     };
   } catch (error) {
     console.error("Failed to get task by id:", error);
@@ -79,18 +93,28 @@ export const getTaskById = async (_id: string): Promise<DbResult<ITask | null>> 
 };
 
 export const updateTask = async (
-  _id: string,
+  id: string,
   payload: CreateTaskInput
-): Promise<DbResult<ITask | null>> => {
+): Promise<DbResult<Task | null>> => {
   try {
-    const task = await TaskModel.findByIdAndUpdate(_id, payload, {
+    const task = await TaskModel.findByIdAndUpdate(id, payload, {
       new: true,
       runValidators: true,
     }).exec();
 
     return {
       status: "success",
-      data: task,
+      data: {
+        id: task._id.toString(),
+        categoryId: task.category_id.toString(),
+        title: task.title,
+        duedTime: task.dued_time,
+        timeline: task.timeline,
+        priority: task.priority,
+        status: task.status,
+        createdAt: task.created_at,
+        updatedAt: task.updated_at,
+      },
     };
   } catch (error) {
     console.error("Failed to update task:", error);
@@ -105,7 +129,7 @@ export const updateTask = async (
 export const patchTask = async (
   _id: string,
   payload: UpdateTaskInput
-): Promise<DbResult<ITask | null>> => {
+): Promise<DbResult<Task | null>> => {
   try {
     const task = await TaskModel.findByIdAndUpdate(_id, payload, {
       new: true,
@@ -114,7 +138,17 @@ export const patchTask = async (
 
     return {
       status: "success",
-      data: task,
+      data: {
+        id: task._id.toString(),
+        categoryId: task.category_id.toString(),
+        title: task.title,
+        duedTime: task.dued_time,
+        timeline: task.timeline,
+        priority: task.priority,
+        status: task.status,
+        createdAt: task.created_at,
+        updatedAt: task.updated_at,
+      },
     };
   } catch (error) {
     console.error("Failed to patch task:", error);
@@ -128,26 +162,25 @@ export const patchTask = async (
 
 export const deleteTask = async (
   _id: string
-): Promise<DbResult<{ message: string }>> => 
-{
-    try {
-        const deletedTask = await TaskModel.findByIdAndDelete(_id).exec();
-        if (!deletedTask) {
-            return {
-                status: "error",
-                message: "Task not found",
-            };
-        }
-        return {
-            status: "success",
-            data: { message: "Task deleted successfully" },
-        };
-    } catch (error) {
-        console.error("Failed to delete task:", error);
-        return {
-            status: "error",
-            message:
-                error instanceof Error ? error.message : "Failed to delete task",
-        };
+): Promise<DbResult<{ message: string }>> => {
+  try {
+    const deletedTask = await TaskModel.findByIdAndDelete(_id).exec();
+    if (!deletedTask) {
+      return {
+        status: "error",
+        message: "Task not found",
+      };
     }
+    return {
+      status: "success",
+      data: { message: "Task deleted successfully" },
+    };
+  } catch (error) {
+    console.error("Failed to delete task:", error);
+    return {
+      status: "error",
+      message:
+        error instanceof Error ? error.message : "Failed to delete task",
+    };
+  }
 }

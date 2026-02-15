@@ -5,11 +5,11 @@ import {
   getTaskById,
   updateTask,
   patchTask,
-  GetTasksFilter,
-  UpdateTaskInput,
   deleteTask,
 } from "../services/task.service";
-import { Timeline, Priority, TaskStatus } from "../types/task.types";
+import { Timeline, Priority, TaskStatus } from "../types/task";
+import { checkValidId } from "../utils/db.util";
+import { GetTasksFilter, UpdateTaskInput } from "../types/task";
 import mongoose from "mongoose";
 
 export const createTaskHandler = async (
@@ -18,39 +18,22 @@ export const createTaskHandler = async (
   next: NextFunction
 ) => {
   try {
-    const { category_id, title, dued_time, timeline, priority, status } =
+    const { categoryId, title, duedTime, timeline, priority, status } =
       req.body;
 
-    if (
-      !category_id ||
-      !title ||
-      !dued_time ||
-      !timeline ||
-      !priority ||
-      !status
-    ) {
-      return res.status(400).json({ message: "Missing required fields" });
+    if (!checkValidId(categoryId)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid ID format",
+      })
     }
 
-    const validTimelines: Timeline[] = ["Before Tet", "30 Tet", "Mung1", "Mung2", "Mung3"];
-    const validPriorities: Priority[] = ["Low", "Medium", "High"];
-    const validStatuses: TaskStatus[] = ["Todo", "In Progress", "Done"];
-
-    if (!validTimelines.includes(timeline)) {
-      return res.status(400).json({ message: "Invalid timeline value" });
-    }
-
-    if (!validPriorities.includes(priority)) {
-      return res.status(400).json({ message: "Invalid priority value" });
-    }
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({ message: "Invalid status value" });
-    }
+    const categoryObjectId = new mongoose.Types.ObjectId(categoryId);
 
     const task = await createTask({
-      category_id,
+      category_id: categoryObjectId,
       title,
-      dued_time,
+      dued_time: duedTime,
       timeline,
       priority,
       status,
@@ -72,35 +55,23 @@ export const getTasksHandler = async (
   next: NextFunction
 ) => {
   try {
-    const { category_id, timeline, priority, status } = req.query;
+    const { categoryId, timeline, priority, status } = req.query;
 
     const filter: GetTasksFilter = {};
 
-    if (typeof category_id === "string") {
-      filter.category_id = category_id;
+    if (categoryId) {
+      filter.category_id = new mongoose.Types.ObjectId(categoryId as string);
     }
 
-    if (typeof timeline === "string") {
-      const validTimelines: Timeline[] = ["Before Tet", "30 Tet", "Mung1", "Mung2", "Mung3"];
-      if (!validTimelines.includes(timeline as Timeline)) {
-        return res.status(400).json({ message: "Invalid timeline value" });
-      }
+    if (timeline) {
       filter.timeline = timeline as Timeline;
     }
 
-    if (typeof priority === "string") {
-      const validPriorities: Priority[] = ["Low", "Medium", "High"];
-      if (!validPriorities.includes(priority as Priority)) {
-        return res.status(400).json({ message: "Invalid priority value" });
-      }
+    if (priority) {
       filter.priority = priority as Priority;
     }
 
-    if (typeof status === "string") {
-      const validStatuses: TaskStatus[] = ["Todo", "In Progress", "Done"];
-      if (!validStatuses.includes(status as TaskStatus)) {
-        return res.status(400).json({ message: "Invalid status value" });
-      }
+    if (status) {
       filter.status = status as TaskStatus;
     }
 
@@ -122,16 +93,16 @@ export const getTaskByIdHandler = async (
   next: NextFunction
 ) => {
   try {
-    const { task_id } = req.params;
+    const { id } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(task_id as string)) {
+    if (!checkValidId(id as string)) {
       return res.status(400).json({
         status: "error",
-        message: "Invalid task id",
+        message: "Invalid ID format",
       });
     }
 
-    const result = await getTaskById(task_id as string);
+    const result = await getTaskById(id as string);
     
     if (result.status === "error") {
       return res.status(500).json(result);
@@ -153,48 +124,23 @@ export const updateTaskHandler = async (
   next: NextFunction
 ) => {
   try {
-    const { task_id } = req.params;
-    const { category_id, title, dued_time, timeline, priority, status } =
+    const { id } = req.params;
+    const { categoryId, title, duedTime, timeline, priority, status } =
       req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(task_id as string)) {
+    if (!checkValidId(id as string) || !checkValidId(categoryId)) {
       return res.status(400).json({
         status: "error",
-        message: "Invalid task id",
+        message: "Invalid ID format",
       });
     }
 
-    if (
-      !category_id ||
-      !title ||
-      !dued_time ||
-      !timeline ||
-      !priority ||
-      !status
-    ) {
-      return res.status(400).json({ message: "Missing required fields" });
-    }
+    const categoryObjectId = new mongoose.Types.ObjectId(categoryId);
 
-    const validTimelines: Timeline[] = ["Before Tet", "30 Tet", "Mung1", "Mung2", "Mung3"];
-    const validPriorities: Priority[] = ["Low", "Medium", "High"];
-    const validStatuses: TaskStatus[] = ["Todo", "In Progress", "Done"];
-
-    if (!validTimelines.includes(timeline)) {
-      return res.status(400).json({ message: "Invalid timeline value" });
-    }
-
-    if (!validPriorities.includes(priority)) {
-      return res.status(400).json({ message: "Invalid priority value" });
-    }
-
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({ message: "Invalid status value" });
-    }
-
-    const result = await updateTask(task_id as string, {
-      category_id,
+    const result = await updateTask(id as string, {
+      category_id: categoryObjectId,
       title,
-      dued_time,
+      dued_time: duedTime,
       timeline,
       priority,
       status,
@@ -220,68 +166,45 @@ export const patchTaskHandler = async (
   next: NextFunction
 ) => {
   try {
-    const { task_id } = req.params;
-    const { category_id, title, dued_time, timeline, priority, status } =
+    const { id } = req.params;
+    const { categoryId, title, duedTime, timeline, priority, status } =
       req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(task_id as string)) {
+    if (!checkValidId(id as string) || (categoryId && !checkValidId(categoryId as string))) {
       return res.status(400).json({
         status: "error",
-        message: "Invalid task id",
+        message: "Invalid ID format",
       });
-    }
-
-    if (
-      category_id === undefined &&
-      title === undefined &&
-      dued_time === undefined &&
-      timeline === undefined &&
-      priority === undefined &&
-      status === undefined
-    ) {
-      return res.status(400).json({ message: "No fields to update" });
     }
 
     const update: UpdateTaskInput = {};
 
-    if (category_id !== undefined) {
-      update.category_id = category_id;
+    if (categoryId) {
+      const categoryObjectId = new mongoose.Types.ObjectId(categoryId);
+      update.category_id = categoryObjectId;
     }
 
-    if (title !== undefined) {
+    if (title) {
       update.title = title;
     }
 
-
-    if (dued_time !== undefined) {
-      update.dued_time = dued_time;
+    if (duedTime) {
+      update.dued_time = duedTime;
     }
 
-    if (timeline !== undefined) {
-      const validTimelines: Timeline[] = ["Before Tet", "30 Tet", "Mung1", "Mung2", "Mung3"];
-      if (!validTimelines.includes(timeline)) {
-        return res.status(400).json({ message: "Invalid timeline value" });
-      }
+    if (timeline) {
       update.timeline = timeline;
     }
 
-    if (priority !== undefined) {
-      const validPriorities: Priority[] = ["Low", "Medium", "High"];
-      if (!validPriorities.includes(priority)) {
-        return res.status(400).json({ message: "Invalid priority value" });
-      }
+    if (priority) {
       update.priority = priority;
     }
 
-    if (status !== undefined) {
-      const validStatuses: TaskStatus[] = ["Todo", "In Progress", "Done"];
-      if (!validStatuses.includes(status)) {
-        return res.status(400).json({ message: "Invalid status value" });
-      }
+    if (status) {
       update.status = status;
     }
 
-    const result = await patchTask(task_id as string, update);
+    const result = await patchTask(id as string, update);
 
     if (result.status === "error") {
       return res.status(500).json(result);
@@ -303,11 +226,20 @@ export const deleteTaskHandler = async (
   next: NextFunction
 ) => {
   try {
-    const { task_id } = req.params;
-    const result = await deleteTask(task_id as string);
+    const { id } = req.params;
+
+    if (!checkValidId(id as string)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid ID format",
+      });
+    }
+
+    const result = await deleteTask(id as string);
     if (result.status === "error") {
       return res.status(500).json(result);
     }
+    
     return res.status(200).json(result);
   } catch (error) {
     return next(error);

@@ -7,15 +7,17 @@ import {
   patchTaskHandler,
   deleteTaskHandler,
 } from "../controllers/task.controller";
+import validate from "../middlewares/validate.mdw";
+import { creatingTaskAjvSchema, updatingTaskAjvSchema, patchingTaskAjvSchema } from "../entities/task.entity";
 
 const router = Router();
 
-router.post("/", createTaskHandler);
+router.post("/", validate(creatingTaskAjvSchema), createTaskHandler);
 router.get("/", getTasksHandler);
-router.get("/:task_id", getTaskByIdHandler);
-router.put("/:task_id", updateTaskHandler);
-router.patch("/:task_id", patchTaskHandler);
-router.delete("/:task_id", deleteTaskHandler);
+router.get("/:id", getTaskByIdHandler);
+router.put("/:id", validate(updatingTaskAjvSchema), updateTaskHandler);
+router.patch("/:id", validate(patchingTaskAjvSchema), patchTaskHandler);
+router.delete("/:id", deleteTaskHandler);
 
 export default router;
 

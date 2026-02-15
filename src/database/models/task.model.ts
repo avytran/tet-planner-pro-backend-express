@@ -1,7 +1,9 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
-import { Timeline, Priority, TaskStatus } from "../../types/task.types"
+import { Timeline, Priority, TaskStatus } from "../../types/task";
+import { ObjectId } from "mongodb";
+
 export interface ITask extends Document {
-  category_id: string;
+  category_id: ObjectId;
   title: string;
   dued_time: Date;
   timeline: Timeline;
@@ -13,7 +15,7 @@ export interface ITask extends Document {
 const TaskSchema: Schema<ITask> = new Schema(
   {
     category_id: {
-      type: String,
+      type: ObjectId,
       required: true,
     },
 
@@ -30,7 +32,7 @@ const TaskSchema: Schema<ITask> = new Schema(
 
     timeline: {
       type: String,
-      enum: ["Before Tet", "30 Tet", "Mung1", "Mung2", "Mung3"],
+      enum: ["Pre Tet", "During Tet", "After Tet"],
       required: true,
     },
 
@@ -48,7 +50,10 @@ const TaskSchema: Schema<ITask> = new Schema(
     },
   },
   {
-    timestamps: true, 
+    timestamps: {
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+    }, 
   }
 );
 

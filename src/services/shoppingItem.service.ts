@@ -168,22 +168,49 @@ export const createShoppingItem = async (item: ShoppingItem): Promise<DbResult<S
   }
 }
 
-export const updateAllFieldsOfShoppingItem = async (id: string, item: ShoppingItem): Promise<DbResult<ShoppingItem> | null> => {
+export const updateAllFieldsOfShoppingItem = async (
+  id: string,
+  payload: Partial<ShoppingItem>
+): Promise<DbResult<ShoppingItem>> => {
   try {
-    const result = await ShoppingItemModel.updateOne({ _id: id }, { $set: item });
+
+    const taskObjectId = new mongoose.Types.ObjectId(payload.task_id);
+    const budgetObjectId = new mongoose.Types.ObjectId(payload.budget_id);
+
+    const updatedItem = await ShoppingItemModel.findByIdAndUpdate(
+      id,
+      { $set: { ...payload, task_id: taskObjectId, budget_id: budgetObjectId } },
+      { new: true, runValidators: true }
+    ).lean();
+
+    if (!updatedItem) {
+      return {
+        status: "error",
+        message: "Shopping item not found",
+      };
+    }
 
     return {
       status: "success",
       data: {
-        id,
-        ...item
-      }
-    }
+        id: updatedItem._id.toString(),
+        budget_id: updatedItem.budget_id.toString(),
+        task_id: updatedItem.task_id.toString(),
+        name: updatedItem.name,
+        price: updatedItem.price,
+        status: updatedItem.status,
+        quantity: updatedItem.quantity,
+        dued_time: updatedItem.dued_time,
+        timeline: updatedItem.timeline,
+        created_at: updatedItem.created_at,
+        updated_at: updatedItem.updated_at
+      },
+    };
   } catch (error) {
-    console.error("createShoppingItem error:", error);
+    console.error("updateShoppingItem error:", error);
     return {
       status: "error",
       message: "Internal server error",
     };
   }
-}
+};

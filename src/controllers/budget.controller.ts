@@ -1,19 +1,24 @@
 import { Request, Response } from "express";
 import { getBudgetById, getBudgets, deleteBudget, createBudget, updateBudget } from "../services/budget.service";
 import { checkValidId } from "../utils/db.util";
+import mongoose from "mongoose";
 
 export const getBudgetByIdController = async (req: Request, res: Response) => {
-    const id = req.params.id as string;
+    const budgetId = req.params.id as string;
+    const userId = req.user.id as string;
 
     try {
-        if (!checkValidId(id)) {
+        if (!checkValidId(budgetId)) {
             return res.status(400).json({
                 status: "error",
                 message: "Invalid ID format",
             })
         }
 
-        const result = await getBudgetById(id);
+        const budgetObjectId = new mongoose.Types.ObjectId(budgetId);
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+
+        const result = await getBudgetById(budgetObjectId, userObjectId);
 
         if (result.status === "error") {
             return res.status(404).json(result);
@@ -61,17 +66,21 @@ export const getBudgetsController = async (req: Request, res: Response) => {
 }
 
 export const deleteBudgetController = async (req: Request, res: Response) => {
-    const id = req.params.id as string;
+    const budgetId = req.params.id as string;
+    const userId = req.user.id as string;
 
     try {
-        if (!checkValidId(id)) {
+        if (!checkValidId(budgetId)) {
             return res.status(400).json({
                 status: "error",
                 message: "Invalid ID format",
             })
         }
 
-        const result = await deleteBudget(id);
+        const budgetObjectId = new mongoose.Types.ObjectId(budgetId);
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+
+        const result = await deleteBudget(budgetObjectId, userObjectId);
 
         if (result.status === "error") {
             if (result.message === "Budget not found") {

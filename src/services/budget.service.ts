@@ -3,12 +3,16 @@ import BudgetModel from "../database/models/budget.model";
 import ShoppingItemModel from "../database/models/shoppingItem.model";
 import { DbResult } from "../types/dbResult";
 import { Budget, BudgetPayload } from "../types/budget";
+import { ObjectId } from "mongodb";
 
-export const getBudgetById = async (id: string): Promise<DbResult<Budget>> => {
+export const getBudgetById = async (budgetObjectId: ObjectId, userObjectId: ObjectId): Promise<DbResult<Budget>> => {
     try {
         const [budget, items] = await Promise.all([
-            BudgetModel.findById(id).exec(),
-            ShoppingItemModel.find({ budget_id: new mongoose.Types.ObjectId(id) })
+            BudgetModel.findOne({
+                _id: budgetObjectId,
+                user_id: userObjectId
+            }).exec(),
+            ShoppingItemModel.find({ budget_id: budgetObjectId })
         ])
 
         if (!budget) {
@@ -101,13 +105,14 @@ export const getBudgets = async (userId: string): Promise<DbResult<Array<Budget>
     }
 }
 
-export const deleteBudget = async (id: string): Promise<DbResult<object>> => {
+export const deleteBudget = async (budgetObjectId: ObjectId, userObjectId: ObjectId): Promise<DbResult<object>> => {
     try {
-        const budgetObjectId = new mongoose.Types.ObjectId(id)
+        const result = await BudgetModel.findOneAndDelete({ 
+            _id: budgetObjectId,
+            user_id: userObjectId,
+        });
 
-        const result = await BudgetModel.deleteOne({ _id: budgetObjectId });
-
-        if (result.deletedCount === 0) {
+        if (!result) {
             return {
                 status: "error",
                 message: "Budget not found",

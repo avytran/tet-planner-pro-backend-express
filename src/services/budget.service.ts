@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import BudgetModel from "../database/models/budget.model";
 import ShoppingItemModel from "../database/models/shoppingItem.model";
 import { DbResult } from "../types/dbResult";
-import { Budget } from "../types/budget";
+import { Budget, BudgetPayload } from "../types/budget";
 
 export const getBudgetById = async (id: string): Promise<DbResult<Budget>> => {
     try {
@@ -122,6 +122,30 @@ export const deleteBudget = async (id: string): Promise<DbResult<object>> => {
         }
     } catch (error) {
         console.error("deleteBudget error:", error);
+        return {
+            status: "error",
+            message: "Internal server error",
+        };
+    }
+}
+
+export const createBudget = async (payload: BudgetPayload): Promise<DbResult<Budget>> => {
+    try {
+        const result = await BudgetModel.insertOne(payload);
+
+        return {
+            status: "success",
+            data: {
+                id: result._id.toString(),
+                user_id: result.user_id.toString(),
+                name: result.name,
+                allocated_amount: result.allocated_amount,
+                created_at: result.created_at,
+                updated_at: result.updated_at,
+            }
+        }
+    } catch (error) {
+        console.error("createBudget error:", error);
         return {
             status: "error",
             message: "Internal server error",

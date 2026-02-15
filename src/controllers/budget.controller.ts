@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getBudgetById, getBudgets, deleteBudget } from "../services/budget.service";
+import { getBudgetById, getBudgets, deleteBudget, createBudget } from "../services/budget.service";
 import { checkValidId } from "../utils/db.util";
 
 export const getBudgetByIdController = async (req: Request, res: Response) => {
@@ -78,6 +78,34 @@ export const deleteBudgetController = async (req: Request, res: Response) => {
         }
 
         return res.status(200).json(result);
+    } catch (error) {
+        console.error("Controller error:", error);
+        return {
+            status: "error",
+            message: "Internal server error",
+        };
+    }
+}
+
+export const createBudgetController = async (req: Request, res: Response) => {
+    const { name, allocated_amount } = req.body;
+    const user_id = req.user.id;
+
+    try {
+        if (!checkValidId(user_id)) {
+            return res.status(400).json({
+                status: "error",
+                message: "Invalid ID format",
+            })
+        }
+
+        const result = await createBudget({ user_id, name, allocated_amount });
+
+        if (result.status === "error") {
+            return res.status(500).json(result);
+        }
+
+        return res.status(201).json(result);
     } catch (error) {
         console.error("Controller error:", error);
         return {

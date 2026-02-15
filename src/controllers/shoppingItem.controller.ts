@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import { Request, Response } from "express";
 import { getShoppingItemById, getShoppingItems, deleteShoppingItem, createShoppingItem, updateAllFieldsOfShoppingItem } from "../services/shoppingItem.service";
 import { checkValidId } from "../utils/db.util";
+import mongoose from "mongoose";
 
 export const getShoppingItemByIdController = async (
   req: Request,
@@ -70,7 +71,7 @@ export const deleteShoppingItemController = async (
   try {
     const id = req.params.id as string;
 
-    if (!ObjectId.isValid(id)) {
+    if (!checkValidId(id)) {
       return res.status(400).json({
         status: "error",
         message: "Invalid ID format",
@@ -106,14 +107,22 @@ export const createShoppingItemController = async (
   const item = req.body;
 
   try {
+    if (!checkValidId(item.budget_id) || !checkValidId(item.task_id)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid ID format",
+      }
+      );
+    }
+
     const result = await createShoppingItem(item);
-    
+
     if (result.status === "error") {
       return res.status(500).json(result);
     }
 
     return res.status(201).json(result);
-    
+
   } catch (error) {
     console.error("Controller Error:", error);
 
@@ -132,14 +141,22 @@ export const updateAllFieldsOfShoppingItemController = async (
   const item = req.body;
 
   try {
+    if (!checkValidId(item.budget_id) || !checkValidId(item.task_id)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid ID format",
+      }
+      );
+    }
+
     const result = await updateAllFieldsOfShoppingItem(id, item);
-    
+
     if (result.status === "error") {
       return res.status(500).json(result);
     }
 
     return res.status(200).json(result);
-    
+
   } catch (error) {
     console.error("Controller Error:", error);
 

@@ -1,6 +1,7 @@
 import mongoose, { Model } from "mongoose";
 import { ObjectId } from "mongodb";
 import BudgetModel from "../database/models/budget.model";
+import TaskCategoryModel from "../database/models/taskCategory.model";
 
 export const checkExistsById = async <T>(
     model: Model<T>,
@@ -23,4 +24,12 @@ export const getUserBudgetIds = async (userId: string) => {
   );
 
   return budgets.map(b => b._id);
+};
+
+export const getUserCategoryIds = async (userId: string) => {
+  const categories = await TaskCategoryModel.find(
+    { user_id: userId },
+    { _id: 1 }
+  );
+  return categories.map(c => c._id);
 };

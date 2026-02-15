@@ -21,7 +21,9 @@ export const createTaskController = async (
     const { categoryId, title, duedTime, timeline, priority, status } =
       req.body;
 
-    if (!checkValidId(categoryId)) {
+    const userId = req.user.id as string;
+
+    if (!checkValidId(categoryId) || !checkValidId(userId)) {
       return res.status(400).json({
         status: "error",
         message: "Invalid ID format",
@@ -37,9 +39,13 @@ export const createTaskController = async (
       timeline,
       priority,
       status,
-    });
+    }, userId);
 
     if (task.status === "error") {
+      if (task.message === "Category does not belong to user") {
+        return res.status(400).json(task);
+      }
+
       return res.status(500).json(task);
     }
 
@@ -56,6 +62,15 @@ export const getTasksController = async (
 ) => {
   try {
     const { categoryId, timeline, priority, status } = req.query;
+
+    const userId = req.user.id as string;
+
+    if (!checkValidId(userId)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Invalid ID format",
+      })
+    }
 
     const filter: GetTasksFilter = {};
 
@@ -75,9 +90,13 @@ export const getTasksController = async (
       filter.status = status as TaskStatus;
     }
 
-    const result = await getTasks(filter);
+    const result = await getTasks(filter, userId);
 
     if (result.status === "error") {
+      if (result.message === "Category does not belong to user") {
+        return res.status(400).json(result);
+      }
+
       return res.status(500).json(result);
     }
 
@@ -94,16 +113,17 @@ export const getTaskByIdController = async (
 ) => {
   try {
     const { id } = req.params;
+    const userId = req.user.id as string;
 
-    if (!checkValidId(id as string)) {
+    if (!checkValidId(id as string) || !checkValidId(userId)) {
       return res.status(400).json({
         status: "error",
         message: "Invalid ID format",
       });
     }
 
-    const result = await getTaskById(id as string);
-    
+    const result = await getTaskById(id as string, userId);
+
     if (result.status === "error") {
       return res.status(500).json(result);
     }
@@ -127,8 +147,9 @@ export const updateTaskController = async (
     const { id } = req.params;
     const { categoryId, title, duedTime, timeline, priority, status } =
       req.body;
+    const userId = req.user.id as string;
 
-    if (!checkValidId(id as string) || !checkValidId(categoryId)) {
+    if (!checkValidId(id as string) || !checkValidId(categoryId)  || !checkValidId(userId)) {
       return res.status(400).json({
         status: "error",
         message: "Invalid ID format",
@@ -144,7 +165,7 @@ export const updateTaskController = async (
       timeline,
       priority,
       status,
-    });
+    }, userId);
 
     if (result.status === "error") {
       return res.status(500).json(result);
@@ -169,8 +190,9 @@ export const patchTaskController = async (
     const { id } = req.params;
     const { categoryId, title, duedTime, timeline, priority, status } =
       req.body;
+    const userId = req.user.id as string;
 
-    if (!checkValidId(id as string) || (categoryId && !checkValidId(categoryId as string))) {
+    if (!checkValidId(id as string) || (categoryId && !checkValidId(categoryId as string)) || !checkValidId(userId)) {
       return res.status(400).json({
         status: "error",
         message: "Invalid ID format",
@@ -204,7 +226,7 @@ export const patchTaskController = async (
       update.status = status;
     }
 
-    const result = await patchTask(id as string, update);
+    const result = await patchTask(id as string, update, userId);
 
     if (result.status === "error") {
       return res.status(500).json(result);
@@ -227,15 +249,16 @@ export const deleteTaskController = async (
 ) => {
   try {
     const { id } = req.params;
+    const userId = req.user.id as string;
 
-    if (!checkValidId(id as string)) {
+    if (!checkValidId(id as string) || !checkValidId(userId)) {
       return res.status(400).json({
         status: "error",
         message: "Invalid ID format",
       });
     }
 
-    const result = await deleteTask(id as string);
+    const result = await deleteTask(id as string, userId);
     if (result.status === "error") {
       return res.status(500).json(result);
     }

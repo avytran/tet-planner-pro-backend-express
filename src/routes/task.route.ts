@@ -9,15 +9,16 @@ import {
 } from "../controllers/task.controller";
 import validate from "../middlewares/validate.mdw";
 import { creatingTaskAjvSchema, updatingTaskAjvSchema, patchingTaskAjvSchema } from "../entities/task.entity";
+import { mockAuth } from "../middlewares/mockAuth.mdw";
 
 const router = Router();
 
-router.post("/", validate(creatingTaskAjvSchema), createTaskController);
-router.get("/", getTasksController);
-router.get("/:id", getTaskByIdController);
-router.put("/:id", validate(updatingTaskAjvSchema), updateTaskController);
-router.patch("/:id", validate(patchingTaskAjvSchema), patchTaskController);
-router.delete("/:id", deleteTaskController);
+router.post("/", mockAuth, validate(creatingTaskAjvSchema), createTaskController);
+router.get("/", mockAuth, getTasksController);
+router.get("/:id", mockAuth, getTaskByIdController);
+router.put("/:id", mockAuth, validate(updatingTaskAjvSchema), updateTaskController);
+router.patch("/:id", mockAuth, validate(patchingTaskAjvSchema), patchTaskController);
+router.delete("/:id", mockAuth, deleteTaskController);
 
 export default router;
 

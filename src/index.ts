@@ -3,7 +3,8 @@ import mongoose from 'mongoose';
 import dotenv from "dotenv";
 import cors from "cors";
 
-import healthRoute from "./routes/health.route";
+import healthRoute from './routes/health.route';
+import taskCategoryRoute from './routes/taskCategory.route';
 import taskRoute from "./routes/task.route";
 import shoppingItemRoute from './routes/shoppingItem.route';
 import budgetRoute from './routes/budget.route';
@@ -26,6 +27,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/health', healthRoute);
+app.use('/v1/task-categories', taskCategoryRoute);
 app.use('/v1/shopping-items', shoppingItemRoute);
 app.use('/v1/budgets', budgetRoute);
 app.use("/v1/tasks", taskRoute);

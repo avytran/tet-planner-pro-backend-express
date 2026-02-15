@@ -1,10 +1,10 @@
 import { Router } from "express";
 import {
-  createTaskCategoryHandler,
-  getTaskCategoriesHandler,
-  getTaskCategoryByIdHandler,
-  updateTaskCategoryHandler,
-  deleteTaskCategoryHandler,
+  createTaskCategoryController,
+  getTaskCategoriesController,
+  getTaskCategoryByIdController,
+  updateTaskCategoryController,
+  deleteTaskCategoryController,
 } from "../controllers/taskCategory.controller";
 import validate from "../middlewares/validate.mdw";
 import { mockAuth } from "../middlewares/mockAuth.mdw";
@@ -12,10 +12,10 @@ import { CreatingTaskCategoryAjvSchema, UpdatingTaskCategoryAjvSchema } from "..
 
 const router = Router();
 
-router.get("/", mockAuth, getTaskCategoriesHandler);
-router.get("/:id", mockAuth, getTaskCategoryByIdHandler);
-router.post("/", mockAuth, validate(CreatingTaskCategoryAjvSchema), createTaskCategoryHandler);
-router.put("/:id", mockAuth, validate(UpdatingTaskCategoryAjvSchema), updateTaskCategoryHandler);
-router.delete("/:id", mockAuth, deleteTaskCategoryHandler);
+router.get("/", mockAuth, getTaskCategoriesController);
+router.get("/:id", mockAuth, getTaskCategoryByIdController);
+router.post("/", mockAuth, validate(CreatingTaskCategoryAjvSchema), createTaskCategoryController);
+router.put("/:id", mockAuth, validate(UpdatingTaskCategoryAjvSchema), updateTaskCategoryController);
+router.delete("/:id", mockAuth, deleteTaskCategoryController);
 
 export default router;

@@ -9,7 +9,7 @@ import {
 import { checkValidId } from "../utils/db.util";
 import mongoose from "mongoose";
 
-export const createTaskCategoryHandler = async (
+export const createTaskCategoryController = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -42,7 +42,7 @@ export const createTaskCategoryHandler = async (
   }
 };
 
-export const getTaskCategoriesHandler = async (
+export const getTaskCategoriesController = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -71,7 +71,7 @@ export const getTaskCategoriesHandler = async (
   }
 };
 
-export const getTaskCategoryByIdHandler = async (
+export const getTaskCategoryByIdController = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -108,7 +108,7 @@ export const getTaskCategoryByIdHandler = async (
   }
 };
 
-export const updateTaskCategoryHandler = async (
+export const updateTaskCategoryController = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -145,7 +145,7 @@ export const updateTaskCategoryHandler = async (
   }
 };
 
-export const deleteTaskCategoryHandler = async (
+export const deleteTaskCategoryController = async (
   req: Request,
   res: Response,
   next: NextFunction

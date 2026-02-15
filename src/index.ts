@@ -5,6 +5,9 @@ import cors from "cors";
 
 import healthRoute from './routes/health.route';
 import taskCategoryRoute from './routes/taskCategory.router';
+import taskRoute from "./routes/task.route";
+import shoppingItemRoute from './routes/shoppingItem.route';
+import budgetRoute from './routes/budget.route';
 
 dotenv.config();
 
@@ -25,6 +28,9 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/health', healthRoute);
 app.use('/v1/task-categories', taskCategoryRoute);
+app.use('/v1/shopping-items', shoppingItemRoute);
+app.use('/v1/budgets', budgetRoute);
+app.use("/v1/tasks", taskRoute);
 
 mongoose.connect(`mongodb+srv://${DB_USERNAME}:${DB_PASSWORD}@tetplannerpro.3yuf5p8.mongodb.net/${DB_NAME}?appName=TetPlannerPro`)
     .then(async () => {

@@ -1,0 +1,29 @@
+export type Timeline = "Pre Tet" | "During Tet" | "After Tet";
+export type ShoppingStatus = "Planning" | "Completed";
+
+export interface ShoppingItem {
+  id: string;
+  budgetId: string;
+  taskId: string;
+  name: string;
+  price: number;
+  status: ShoppingStatus;
+  quantity: number;
+  duedTime: Date;
+  timeline: Timeline;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ShoppingItemQuery {
+  budgetId?: string;
+  taskId?: string;
+  timeline?: string;
+  duedTime?: string;
+  status?: string;
+  keyword?: string;
+  sortBy?: string;
+  sortOrder?: string;
+  page?: number;
+  pageSize?: number;
+}

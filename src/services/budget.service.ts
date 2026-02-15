@@ -100,3 +100,31 @@ export const getBudgets = async (userId: string): Promise<DbResult<Array<Budget>
         };
     }
 }
+
+export const deleteBudget = async (id: string): Promise<DbResult<object>> => {
+    try {
+        const budgetObjectId = new mongoose.Types.ObjectId(id)
+
+        const result = await BudgetModel.deleteOne({ _id: budgetObjectId });
+
+        if (result.deletedCount === 0) {
+            return {
+                status: "error",
+                message: "Budget not found",
+            };
+        }
+
+        return {
+            status: "success",
+            data: {
+                "message": "Shopping item deleted successfully"
+            }
+        }
+    } catch (error) {
+        console.error("deleteBudget error:", error);
+        return {
+            status: "error",
+            message: "Internal server error",
+        };
+    }
+}

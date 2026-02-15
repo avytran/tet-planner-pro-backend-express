@@ -9,7 +9,7 @@ export const checkExistsById = async <T>(
     return !!exists;
 }
 
-export const checkValidId = async (id: string): Promise<boolean> => {
+export const checkValidId = (id: string): boolean => {
     const isValid = ObjectId.isValid(id);
 
     return isValid;

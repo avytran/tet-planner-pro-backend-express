@@ -1,5 +1,6 @@
 import TaskModel from "../database/models/task.model";
 import TaskCategoryModel from "../database/models/taskCategory.model";
+import ShoppingItemModel from "../database/models/shoppingItem.model";
 import { Task, CreateTaskInput, UpdateTaskInput, GetTasksFilter } from "../types/task";
 import { DbResult } from "../types/dbResult";
 import { getUserCategoryIds } from "../utils/db.util";
@@ -272,30 +273,47 @@ export const deleteTask = async (
   taskId: string,
   userId: string
 ): Promise<DbResult<{ message: string }>> => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const userCategoryIds = await getUserCategoryIds(userId);
 
-    const deletedTask = await TaskModel.findOneAndDelete({
-      _id: taskId,
-      category_id: { $in: userCategoryIds },
-    }).exec();
+    const deletedTask = await TaskModel.findOneAndDelete(
+      {
+        _id: new mongoose.Types.ObjectId(taskId),
+        category_id: { $in: userCategoryIds }
+      },
+      { session }
+    );
 
     if (!deletedTask) {
+      await session.abortTransaction();
       return {
         status: "error",
-        message: "Task not found or not authorized",
+        message: "Task not found or not authorized"
       };
     }
+
+    await ShoppingItemModel.deleteMany(
+      { task_id: deletedTask._id },
+      { session }
+    );
+
+    await session.commitTransaction();
+
     return {
       status: "success",
-      data: { message: "Task deleted successfully" },
+      data: { message: "Task and related shopping items deleted successfully" }
     };
   } catch (error) {
+    await session.abortTransaction();
     console.error("Failed to delete task:", error);
     return {
       status: "error",
-      message:
-        error instanceof Error ? error.message : "Failed to delete task",
+      message: error instanceof Error ? error.message : "Failed to delete task"
     };
+  } finally {
+    session.endSession();
   }
-}
+};

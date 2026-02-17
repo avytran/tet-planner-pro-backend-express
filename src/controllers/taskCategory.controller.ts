@@ -77,7 +77,7 @@ export const getTaskCategoryByIdController = async (
   next: NextFunction
 ) => {
   try {
-    const categoryId = req.params.id as string;
+    const categoryId = req.params.categoryId as string;
     const userId = req.user.id;
 
     if (!checkValidId(userId) || !checkValidId(categoryId)) {
@@ -114,7 +114,7 @@ export const updateTaskCategoryController = async (
   next: NextFunction
 ) => {
   try {
-    const categoryId = req.params.id as string;
+    const categoryId = req.params.categoryId as string;
     const userId = req.user.id;
     const { name } = req.body;
 
@@ -151,7 +151,7 @@ export const deleteTaskCategoryController = async (
   next: NextFunction
 ) => {
   try {
-    const categoryId = req.params.id as string;
+    const categoryId = req.params.categoryId as string;
     const userId = req.user.id;
 
     if (!checkValidId(userId) || !checkValidId(categoryId)) {

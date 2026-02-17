@@ -7,13 +7,13 @@ export const getShoppingItemByIdController = async (
   res: Response
 ) => {
   try {
-    const itemId = req.params.id as string;
+    const itemId = req.params.itemId as string;
     const userId = req.user.id as string;
 
     if (!checkValidId(itemId) || !checkValidId(userId)) {
       return res.status(400).json({
         status: "error",
-        message: "Invalid request",
+        message: "Invalid ID format",
       }
       );
     }
@@ -51,7 +51,7 @@ export const getShoppingItemsController = async (
     if (!checkValidId(userId)) {
       return res.status(400).json({
         status: "error",
-        message: "Invalid request",
+        message: "Invalid ID format",
       }
       );
     }
@@ -78,13 +78,13 @@ export const deleteShoppingItemController = async (
   res: Response
 ) => {
   try {
-    const itemId = req.params.id as string;
+    const itemId = req.params.itemId as string;
     const userId = req.user.id as string;
 
     if (!checkValidId(itemId) || !checkValidId(userId)) {
       return res.status(400).json({
         status: "error",
-        message: "Invalid request",
+        message: "Invalid ID format",
       }
       );
     }
@@ -122,7 +122,7 @@ export const createShoppingItemController = async (
     if (!checkValidId(item.budgetId) || !checkValidId(item.taskId) || !checkValidId(userId)) {
       return res.status(400).json({
         status: "error",
-        message: "Invalid request",
+        message: "Invalid ID format",
       }
       );
     }
@@ -152,7 +152,7 @@ export const updateAllFieldsOfShoppingItemController = async (
   req: Request,
   res: Response
 ) => {
-  const itemId = req.params.id as string;
+  const itemId = req.params.itemId as string;
   const item = req.body;
   const userId = req.user.id as string;
 
@@ -160,7 +160,7 @@ export const updateAllFieldsOfShoppingItemController = async (
     if (!checkValidId(item.budgetId) || !checkValidId(item.taskId) || !checkValidId(userId)) {
       return res.status(400).json({
         status: "error",
-        message: "Invalid request",
+        message: "Invalid ID format",
       }
       );
     }

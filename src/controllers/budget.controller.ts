@@ -4,7 +4,7 @@ import { checkValidId } from "../utils/db.util";
 import mongoose from "mongoose";
 
 export const getBudgetByIdController = async (req: Request, res: Response) => {
-    const budgetId = req.params.id as string;
+    const budgetId = req.params.budgetId as string;
     const userId = req.user.id as string;
 
     try {
@@ -66,7 +66,7 @@ export const getBudgetsController = async (req: Request, res: Response) => {
 }
 
 export const deleteBudgetController = async (req: Request, res: Response) => {
-    const budgetId = req.params.id as string;
+    const budgetId = req.params.budgetId as string;
     const userId = req.user.id as string;
 
     try {
@@ -130,7 +130,7 @@ export const createBudgetController = async (req: Request, res: Response) => {
 export const updateBudgetController = async (req: Request, res: Response) => {
     const { name, allocatedAmount } = req.body;
     const userId = req.user.id;
-    const budgetId = req.params.id as string;
+    const budgetId = req.params.budgetId as string;
 
     try {
         if (!checkValidId(userId) || !checkValidId(budgetId)) {

@@ -1,35 +1,105 @@
 import mongoose from "mongoose";
 import ShoppingItemModel from "../database/models/shoppingItem.model";
 import BudgetModel from "../database/models/budget.model";
+import TaskModel from "../database/models/task.model";
 import { DbResult } from "../types/dbResult";
 import { ShoppingItem, ShoppingItemQuery } from "../types/shoppingItem";
-import { getUserBudgetIds } from "../utils/db.util";
 
 export const getShoppingItemById = async (
   itemId: string,
   userId: string
 ): Promise<DbResult<ShoppingItem>> => {
   try {
-    const userBudgetIds = await getUserBudgetIds(userId);
+    const itemObjectId = new mongoose.Types.ObjectId(itemId);
+    const userObjectId = new mongoose.Types.ObjectId(userId);
 
-    const item = await ShoppingItemModel.findOne({
-      _id: itemId,
-      budget_id: { $in: userBudgetIds }
-    });
+    const result = await ShoppingItemModel.aggregate([
+      {
+        $match: { _id: itemObjectId }
+      },
 
-    if (!item) {
+      {
+        $lookup: {
+          from: "budgets",
+          localField: "budget_id",
+          foreignField: "_id",
+          as: "budget"
+        }
+      },
+      { $unwind: "$budget" },
+
+      {
+        $match: {
+          "budget.user_id": userObjectId
+        }
+      },
+
+      {
+        $lookup: {
+          from: "tasks",
+          localField: "task_id",
+          foreignField: "_id",
+          as: "task"
+        }
+      },
+      { $unwind: "$task" },
+
+      {
+        $lookup: {
+          from: "task_categories",
+          localField: "task.category_id",
+          foreignField: "_id",
+          as: "task_category"
+        }
+      },
+      { $unwind: "$task_category" },
+
+      {
+        $match: {
+          "task_category.user_id": userObjectId
+        }
+      },
+
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          price: 1,
+          quantity: 1,
+          status: 1,
+          dued_time: 1,
+          timeline: 1,
+          created_at: 1,
+          updated_at: 1,
+
+          budget: {
+            id: "$budget._id",
+            name: "$budget.name",
+          },
+
+          task: {
+            id: "$task._id",
+            title: "$task.title",
+          }
+        }
+      }
+    ]);
+
+    if (!result.length) {
       return {
         status: "error",
         message: "Shopping item not found",
       };
     }
 
+    const item = result[0];
+
     return {
       status: "success",
       data: {
-        id: item._id.toString(),
-        budgetId: item.budget_id.toString(),
-        taskId: item.task_id.toString(),
+        id: item._id,
+        budget: item.budget,
+        task: item.task,
         name: item.name,
         price: item.price,
         status: item.status,
@@ -51,14 +121,7 @@ export const getShoppingItemById = async (
 
 export const getShoppingItems = async (query: ShoppingItemQuery, userId: string): Promise<DbResult<object>> => {
   try {
-    const userBudgetIds = await getUserBudgetIds(userId);
-
-    if (userBudgetIds.length === 0) {
-      return {
-        status: "success",
-        data: { page: 1, pageSize: 10, totalItems: 0, totalPages: 0, items: [] }
-      };
-    }
+    const userObjectId = new mongoose.Types.ObjectId(userId);
 
     const {
       budgetId,
@@ -73,52 +136,133 @@ export const getShoppingItems = async (query: ShoppingItemQuery, userId: string)
       pageSize = 10
     } = query;
 
-    const filter: any = {
-      budget_id: { $in: userBudgetIds }
-    };
+    const matchStage: any = {};
 
-    // Filters
-    if (timeline) filter.timeline = timeline;
-    if (status) filter.status = status;
+    // Filter
+    if (timeline) matchStage.timeline = timeline;
+    if (status) matchStage.status = status;
 
     if (budgetId && mongoose.Types.ObjectId.isValid(budgetId)) {
-      filter.budget_id = new mongoose.Types.ObjectId(budgetId);
+      matchStage.budget_id = new mongoose.Types.ObjectId(budgetId);
     }
 
     if (taskId && mongoose.Types.ObjectId.isValid(taskId)) {
-      filter.task_id = new mongoose.Types.ObjectId(taskId);
+      matchStage.task_id = new mongoose.Types.ObjectId(taskId);
     }
 
     if (duedTime) {
       const start = new Date(duedTime);
       const end = new Date(duedTime);
       end.setHours(23, 59, 59, 999);
-      filter.dued_time = { $gte: start, $lte: end };
+      matchStage.dued_time = { $gte: start, $lte: end };
     }
 
     // Search keyword
     if (keyword) {
-      filter.name = { $regex: keyword, $options: "i" };
+      matchStage.name = { $regex: keyword, $options: "i" };
     }
 
     // Sort
-    const sort: any = {};
-    sort[sortBy] = sortOrder === "asc" ? 1 : -1;
+    const sortStage: any = {};
+    sortStage[sortBy] = sortOrder === "asc" ? 1 : -1;
 
-    const skip = (page - 1) * pageSize;
+    const skip = (Number(page) - 1) * Number(pageSize);
 
-    const [items, totalItems] = await Promise.all([
-      ShoppingItemModel.find(filter)
-        .sort(sort)
-        .skip(skip)
-        .limit(Number(pageSize)),
-      ShoppingItemModel.countDocuments(filter)
-    ]);
+    const pipeline = [
+      {
+        $match: matchStage
+      },
+
+      {
+        $lookup: {
+          from: "budgets",
+          localField: "budget_id",
+          foreignField: "_id",
+          as: "budget"
+        }
+      },
+      {
+        $unwind: "$budget"
+      },
+
+      {
+        $match: {
+          "budget.user_id": userObjectId
+        }
+      },
+
+      {
+        $lookup: {
+          from: "tasks",
+          localField: "task_id",
+          foreignField: "_id",
+          as: "task"
+        }
+      },
+      { $unwind: "$task" },
+
+      {
+        $lookup: {
+          from: "task_categories",
+          localField: "task.category_id",
+          foreignField: "_id",
+          as: "task_category"
+        }
+      },
+      { $unwind: "$task_category" },
+
+      {
+        $match: {
+          "task_category.user_id": userObjectId
+        }
+      },
+
+      { $sort: sortStage },
+
+      {
+        $facet: {
+          items: [
+            { $skip: skip },
+            { $limit: Number(pageSize) },
+            {
+              $project: {
+                _id: 1,
+                name: 1,
+                price: 1,
+                status: 1,
+                quantity: 1,
+                dued_time: 1,
+                timeline: 1,
+                created_at: 1,
+                updated_at: 1,
+                budget: {
+                  id: "$budget._id",
+                  name: "$budget.name",
+                },
+
+                task: {
+                  id: "$task._id",
+                  title: "$task.title",
+                }
+              }
+            }
+          ],
+          totalCount: [
+            { $count: "count" }
+          ]
+        }
+      }
+    ]
+
+    const aggResult = await ShoppingItemModel.aggregate(pipeline);
+
+    const items = aggResult[0].items || [];
+    const totalItems = aggResult[0].totalCount[0]?.count || 0;
 
     const result = items.map(item => ({
-      id: item._id.toString(),
-      budgetId: item.budget_id.toString(),
-      taskId: item.task_id.toString(),
+      id: item._id,
+      budget: item.budget,
+      task: item.task,
       name: item.name,
       price: item.price,
       status: item.status,
@@ -150,26 +294,74 @@ export const getShoppingItems = async (query: ShoppingItemQuery, userId: string)
 
 export const deleteShoppingItem = async (itemId: string, userId: string): Promise<DbResult<object>> => {
   try {
-    const userBudgetIds = await getUserBudgetIds(userId);
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    const itemObjectId = new mongoose.Types.ObjectId(itemId);
 
-    const result = await ShoppingItemModel.deleteOne({
-      _id: itemId,
-      budget_id: { $in: userBudgetIds }
-    });
+    const items = await ShoppingItemModel.aggregate([
+      {
+        $match: { _id: itemObjectId }
+      },
 
-    if (result.deletedCount === 0) {
+      {
+        $lookup: {
+          from: "budgets",
+          localField: "budget_id",
+          foreignField: "_id",
+          as: "budget"
+        }
+      },
+      { $unwind: "$budget" },
+
+      {
+        $match: {
+          "budget.user_id": userObjectId
+        }
+      },
+
+      {
+        $lookup: {
+          from: "tasks",
+          localField: "task_id",
+          foreignField: "_id",
+          as: "task"
+        }
+      },
+      { $unwind: "$task" },
+
+      {
+        $lookup: {
+          from: "task_categories",
+          localField: "task.category_id",
+          foreignField: "_id",
+          as: "task_category"
+        }
+      },
+      { $unwind: "$task_category" },
+
+      {
+        $match: {
+          "task_category.user_id": userObjectId
+        }
+      },
+
+      { $project: { _id: 1 } }
+    ]);
+
+    if (items.length === 0) {
       return {
         status: "error",
-        message: "Shopping item not found",
+        message: "Shopping item not found"
       };
     }
+
+    await ShoppingItemModel.deleteOne({ _id: itemObjectId });
 
     return {
       status: "success",
       data: {
-        "message": "Shopping item deleted successfully"
+        message: "Shopping item deleted successfully"
       }
-    }
+    };
   } catch (error) {
     console.error("deleteShoppingItem error:", error);
     return {
@@ -181,26 +373,51 @@ export const deleteShoppingItem = async (itemId: string, userId: string): Promis
 
 export const createShoppingItem = async (item: ShoppingItem, userId: string): Promise<DbResult<ShoppingItem>> => {
   try {
-    const budget = await BudgetModel.findOne({
-      _id: item.budgetId,
-      user_id: userId
-    });
+    const [validation] = await ShoppingItemModel.aggregate([
+      {
+        $lookup: {
+          from: "budgets",
+          localField: "budget_id",
+          foreignField: "_id",
+          as: "budget"
+        }
+      },
+      {
+        $lookup: {
+          from: "tasks",
+          localField: "task_id",
+          foreignField: "_id",
+          as: "task"
+        }
+      },
+      {
+        $lookup: {
+          from: "task_categories",
+          localField: "task.category_id",
+          foreignField: "_id",
+          as: "task_category"
+        }
+      },
+      {
+        $match: {
+          "budget._id": new mongoose.Types.ObjectId(item.budgetId),
+          "budget.user_id": new mongoose.Types.ObjectId(userId),
+          "task._id": new mongoose.Types.ObjectId(item.taskId),
+          "task_category.user_id": new mongoose.Types.ObjectId(userId)
+        }
+      }
+    ]);
 
-    if (!budget) {
+    if (!validation) {
       return {
         status: "error",
-        message: "Budget does not belong to user"
+        message: "Budget or Task does not belong to user"
       };
     }
 
-    // Task
-
-    const budgetObjectId = new mongoose.Types.ObjectId(item.budgetId);
-    const taskObjectId = new mongoose.Types.ObjectId(item.taskId);
-
-    const result = await ShoppingItemModel.insertOne({
-      budget_id: budgetObjectId,
-      task_id: taskObjectId,
+    const created = await ShoppingItemModel.create({
+      budget_id: item.budgetId,
+      task_id: item.taskId,
       name: item.name,
       price: item.price,
       status: item.status,
@@ -212,19 +429,19 @@ export const createShoppingItem = async (item: ShoppingItem, userId: string): Pr
     return {
       status: "success",
       data: {
-        id: result._id.toString(),
-        budgetId: result.budget_id.toString(),
-        taskId: result.task_id.toString(),
-        name: result.name,
-        price: result.price,
-        status: result.status,
-        quantity: result.quantity,
-        duedTime: result.dued_time,
-        timeline: result.timeline,
-        createdAt: result.created_at,
-        updatedAt: result.updated_at
+        id: created._id.toString(),
+        budgetId: created.budget_id.toString(),
+        taskId: created.task_id.toString(),
+        name: created.name,
+        price: created.price,
+        status: created.status,
+        quantity: created.quantity,
+        duedTime: created.dued_time,
+        timeline: created.timeline,
+        createdAt: created.created_at,
+        updatedAt: created.updated_at
       }
-    }
+    };
   } catch (error) {
     console.error("createShoppingItem error:", error);
     return {
@@ -234,38 +451,121 @@ export const createShoppingItem = async (item: ShoppingItem, userId: string): Pr
   }
 }
 
-export const updateAllFieldsOfShoppingItem = async (itemId: string, payload: Partial<ShoppingItem>, userId: string): Promise<DbResult<ShoppingItem>> => {
+export const updateAllFieldsOfShoppingItem = async (
+  itemId: string,
+  payload: Partial<ShoppingItem>,
+  userId: string
+): Promise<DbResult<ShoppingItem>> => {
   try {
-    const userBudgetIds = await getUserBudgetIds(userId);
+    const objectItemId = new mongoose.Types.ObjectId(itemId);
+    const objectUserId = new mongoose.Types.ObjectId(userId);
 
-    if (payload.budgetId && !userBudgetIds.some(id => id.toString() === payload.budgetId)) {
+    const item = await ShoppingItemModel.aggregate([
+      { $match: { _id: objectItemId } },
+
+      {
+        $lookup: {
+          from: "budgets",
+          localField: "budget_id",
+          foreignField: "_id",
+          as: "budget"
+        }
+      },
+      { $unwind: "$budget" },
+
+      {
+        $lookup: {
+          from: "tasks",
+          localField: "task_id",
+          foreignField: "_id",
+          as: "task"
+        }
+      },
+      { $unwind: "$task" },
+
+      {
+        $lookup: {
+          from: "task_categories",
+          localField: "task.category_id",
+          foreignField: "_id",
+          as: "task_category"
+        }
+      },
+      { $unwind: "$task_category" },
+
+      {
+        $match: {
+          "budget.user_id": objectUserId,
+          "task_category.user_id": objectUserId
+        }
+      }
+    ]);
+
+    if (!item.length) {
       return {
-        status: "error", 
-        message: "Budget does not belong to user"
+        status: "error",
+        message: "Shopping item does not belong to user"
       };
     }
 
+    if (payload.budgetId) {
+      const budgetExists = await BudgetModel.exists({
+        _id: payload.budgetId,
+        user_id: userId
+      });
+
+      if (!budgetExists) {
+        return {
+          status: "error",
+          message: "Budget does not belong to user"
+        };
+      }
+    }
+
+    if (payload.taskId) {
+      const task = await TaskModel.aggregate([
+        { $match: { _id: new mongoose.Types.ObjectId(payload.taskId) } },
+        {
+          $lookup: {
+            from: "task_categories",
+            localField: "category_id",
+            foreignField: "_id",
+            as: "category"
+          }
+        },
+        { $unwind: "$category" },
+        { $match: { "category.user_id": objectUserId } }
+      ]);
+
+      if (!task.length) {
+        return {
+          status: "error",
+          message: "Task does not belong to user"
+        };
+      }
+    }
+
+    const updateData: any = {};
+
+    if (payload.budgetId) updateData.budget_id = new mongoose.Types.ObjectId(payload.budgetId);
+    if (payload.taskId) updateData.task_id = new mongoose.Types.ObjectId(payload.taskId);
+    if (payload.name !== undefined) updateData.name = payload.name;
+    if (payload.price !== undefined) updateData.price = payload.price;
+    if (payload.status !== undefined) updateData.status = payload.status;
+    if (payload.quantity !== undefined) updateData.quantity = payload.quantity;
+    if (payload.duedTime !== undefined) updateData.dued_time = payload.duedTime;
+    if (payload.timeline !== undefined) updateData.timeline = payload.timeline;
+
     const updatedItem = await ShoppingItemModel.findByIdAndUpdate(
-      { _id: itemId, budget_id: { $in: userBudgetIds } },
-      {
-        $set: {
-          budget_id: payload.budgetId ? new mongoose.Types.ObjectId(payload.budgetId) : undefined,
-        task_id: payload.taskId ? new mongoose.Types.ObjectId(payload.taskId) : undefined,
-          name: payload.name,
-          price: payload.price,
-          status: payload.status,
-          quantity: payload.quantity,
-          dued_time: payload.duedTime,
-          timeline: payload.timeline,
-        }
-      },
+      objectItemId,
+      { $set: updateData },
       { new: true }
     ).lean();
 
     if (!updatedItem) {
       return {
         status: "error",
-        message: "Shopping item not found",
+        message: "Shopping item not found"
       };
     }
 
@@ -283,13 +583,14 @@ export const updateAllFieldsOfShoppingItem = async (itemId: string, payload: Par
         timeline: updatedItem.timeline,
         createdAt: updatedItem.created_at,
         updatedAt: updatedItem.updated_at
-      },
+      }
     };
+
   } catch (error) {
-    console.error("updateShoppingItem error:", error);
+    console.error("updateAllFieldsOfShoppingItem error:", error);
     return {
       status: "error",
-      message: "Internal server error",
+      message: "Internal server error"
     };
   }
 };

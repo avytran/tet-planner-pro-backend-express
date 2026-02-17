@@ -1,10 +1,15 @@
+import { BudgetForShoppingItem } from "./budget";
+import { TaskForShoppingItem } from "./task";
+
 export type Timeline = "Pre Tet" | "During Tet" | "After Tet";
 export type ShoppingStatus = "Planning" | "Completed";
 
 export interface ShoppingItem {
   id: string;
-  budgetId: string;
-  taskId: string;
+  budgetId?: string;
+  taskId?: string;
+  budget?: BudgetForShoppingItem;
+  task?: TaskForShoppingItem;
   name: string;
   price: number;
   status: ShoppingStatus;

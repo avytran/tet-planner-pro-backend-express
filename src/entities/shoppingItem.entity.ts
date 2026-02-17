@@ -31,7 +31,7 @@ export const CreatingShoppingItemAjvSchema = {
 
 export const UpdatingAllFieldShoppingItemAjvSchema = {
   ...basedShoppingItemAjvSchema,
-  required: ["budgetId", "taskId", "name", "quantity", "price", "duedTime", "timeline", "status"],
+  required: [],
   additionalProperties: false,
 };
 

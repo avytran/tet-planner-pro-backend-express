@@ -27,10 +27,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/health', healthRoute);
-app.use('/v1/task-categories', taskCategoryRoute);
-app.use('/v1/shopping-items', shoppingItemRoute);
-app.use('/v1/budgets', budgetRoute);
-app.use("/v1/tasks", taskRoute);
+app.use('/v1/users/:userId/task-categories', taskCategoryRoute);
+app.use('/v1/users/:userId/tasks', taskRoute);
+app.use('/v1/users/:userId/shopping-items', shoppingItemRoute);
+app.use('/v1/users/:userId/budgets', budgetRoute);
 
 mongoose.connect(`mongodb+srv://${DB_USERNAME}:${DB_PASSWORD}@tetplannerpro.3yuf5p8.mongodb.net/${DB_NAME}?appName=TetPlannerPro`)
     .then(async () => {

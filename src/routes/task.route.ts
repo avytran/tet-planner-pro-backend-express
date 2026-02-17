@@ -10,15 +10,16 @@ import {
 import validate from "../middlewares/validate.mdw";
 import { creatingTaskAjvSchema, updatingTaskAjvSchema, patchingTaskAjvSchema } from "../entities/task.entity";
 import { mockAuth } from "../middlewares/mockAuth.mdw";
+import { verifyUser } from "../middlewares/verifyUser.mdw";
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
-router.post("/", mockAuth, validate(creatingTaskAjvSchema), createTaskController);
-router.get("/", mockAuth, getTasksController);
-router.get("/:id", mockAuth, getTaskByIdController);
-router.put("/:id", mockAuth, validate(updatingTaskAjvSchema), updateTaskController);
-router.patch("/:id", mockAuth, validate(patchingTaskAjvSchema), patchTaskController);
-router.delete("/:id", mockAuth, deleteTaskController);
+router.post("/", mockAuth, verifyUser, validate(creatingTaskAjvSchema), createTaskController);
+router.get("/", mockAuth, verifyUser, getTasksController);
+router.get("/:taskId", mockAuth, verifyUser, getTaskByIdController);
+router.put("/:taskId", mockAuth, verifyUser, validate(updatingTaskAjvSchema), updateTaskController);
+router.patch("/:taskId", mockAuth, verifyUser, validate(patchingTaskAjvSchema), patchTaskController);
+router.delete("/:taskId", mockAuth, verifyUser, deleteTaskController);
 
 export default router;
 

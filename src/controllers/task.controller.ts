@@ -112,17 +112,17 @@ export const getTaskByIdController = async (
   next: NextFunction
 ) => {
   try {
-    const { id } = req.params;
+    const { taskId } = req.params;
     const userId = req.user.id as string;
 
-    if (!checkValidId(id as string) || !checkValidId(userId)) {
+    if (!checkValidId(taskId as string) || !checkValidId(userId)) {
       return res.status(400).json({
         status: "error",
         message: "Invalid ID format",
       });
     }
 
-    const result = await getTaskById(id as string, userId);
+    const result = await getTaskById(taskId as string, userId);
 
     if (result.status === "error") {
       return res.status(500).json(result);
@@ -144,12 +144,12 @@ export const updateTaskController = async (
   next: NextFunction
 ) => {
   try {
-    const { id } = req.params;
+    const { taskId } = req.params;
     const { categoryId, title, duedTime, timeline, priority, status } =
       req.body;
     const userId = req.user.id as string;
 
-    if (!checkValidId(id as string) || !checkValidId(categoryId)  || !checkValidId(userId)) {
+    if (!checkValidId(taskId as string) || !checkValidId(categoryId)  || !checkValidId(userId)) {
       return res.status(400).json({
         status: "error",
         message: "Invalid ID format",
@@ -158,7 +158,7 @@ export const updateTaskController = async (
 
     const categoryObjectId = new mongoose.Types.ObjectId(categoryId);
 
-    const result = await updateTask(id as string, {
+    const result = await updateTask(taskId as string, {
       category_id: categoryObjectId,
       title,
       dued_time: duedTime,
@@ -187,12 +187,12 @@ export const patchTaskController = async (
   next: NextFunction
 ) => {
   try {
-    const { id } = req.params;
+    const { taskId } = req.params;
     const { categoryId, title, duedTime, timeline, priority, status } =
       req.body;
     const userId = req.user.id as string;
 
-    if (!checkValidId(id as string) || (categoryId && !checkValidId(categoryId as string)) || !checkValidId(userId)) {
+    if (!checkValidId(taskId as string) || (categoryId && !checkValidId(categoryId as string)) || !checkValidId(userId)) {
       return res.status(400).json({
         status: "error",
         message: "Invalid ID format",
@@ -226,7 +226,7 @@ export const patchTaskController = async (
       update.status = status;
     }
 
-    const result = await patchTask(id as string, update, userId);
+    const result = await patchTask(taskId as string, update, userId);
 
     if (result.status === "error") {
       return res.status(500).json(result);
@@ -248,17 +248,17 @@ export const deleteTaskController = async (
   next: NextFunction
 ) => {
   try {
-    const { id } = req.params;
+    const { taskId } = req.params;
     const userId = req.user.id as string;
 
-    if (!checkValidId(id as string) || !checkValidId(userId)) {
+    if (!checkValidId(taskId as string) || !checkValidId(userId)) {
       return res.status(400).json({
         status: "error",
         message: "Invalid ID format",
       });
     }
 
-    const result = await deleteTask(id as string, userId);
+    const result = await deleteTask(taskId as string, userId);
     if (result.status === "error") {
       return res.status(500).json(result);
     }

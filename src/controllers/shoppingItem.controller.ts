@@ -130,7 +130,7 @@ export const createShoppingItemController = async (
     const result = await createShoppingItem(item, userId);
 
     if (result.status === "error") {
-      if (result.message === "Budget does not belong to user") {
+      if (result.message === "Budget or Task does not belong to user") {
         return res.status(400).json(result);
       }
       return res.status(500).json(result);

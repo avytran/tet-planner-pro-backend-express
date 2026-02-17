@@ -15,3 +15,8 @@ export interface BudgetPayload {
     name: string,
     allocatedAmount: number
 }
+
+export interface BudgetForShoppingItem {
+  id: string,
+  name: string,
+}

@@ -105,34 +105,52 @@ export const getBudgets = async (userId: string): Promise<DbResult<Array<Budget>
     }
 }
 
-export const deleteBudget = async (budgetObjectId: ObjectId, userObjectId: ObjectId): Promise<DbResult<object>> => {
-    try {
-        const result = await BudgetModel.findOneAndDelete({ 
-            _id: budgetObjectId,
-            user_id: userObjectId,
-        });
+export const deleteBudget = async (
+    budgetObjectId: ObjectId,
+    userObjectId: ObjectId
+): Promise<DbResult<object>> => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-        if (!result) {
+    try {
+        const budget = await BudgetModel.findOneAndDelete(
+            {
+                _id: budgetObjectId,
+                user_id: userObjectId
+            },
+            { session }
+        );
+
+        if (!budget) {
+            await session.abortTransaction();
             return {
                 status: "error",
-                message: "Budget not found",
+                message: "Budget not found"
             };
         }
 
+        await ShoppingItemModel.deleteMany(
+            { budget_id: budgetObjectId },
+            { session }
+        );
+
+        await session.commitTransaction();
+
         return {
             status: "success",
-            data: {
-                "message": "Shopping item deleted successfully"
-            }
-        }
+            data: { message: "Budget and related shopping items deleted successfully" }
+        };
     } catch (error) {
+        await session.abortTransaction();
         console.error("deleteBudget error:", error);
         return {
             status: "error",
-            message: "Internal server error",
+            message: "Internal server error"
         };
+    } finally {
+        session.endSession();
     }
-}
+};
 
 export const createBudget = async (payload: BudgetPayload): Promise<DbResult<Budget>> => {
     try {

@@ -33,3 +33,9 @@ export interface GetTasksFilter {
 }
 
 export type UpdateTaskInput = Partial<CreateTaskInput>;
+
+export interface TaskForShoppingItem {
+  id: string,
+  title: string,
+}
+ 

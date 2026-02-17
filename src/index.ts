@@ -8,6 +8,7 @@ import taskCategoryRoute from './routes/taskCategory.route';
 import taskRoute from "./routes/task.route";
 import shoppingItemRoute from './routes/shoppingItem.route';
 import budgetRoute from './routes/budget.route';
+import userRoute from './routes/user.route';
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.use('/v1/users/:userId/task-categories', taskCategoryRoute);
 app.use('/v1/users/:userId/tasks', taskRoute);
 app.use('/v1/users/:userId/shopping-items', shoppingItemRoute);
 app.use('/v1/users/:userId/budgets', budgetRoute);
+app.use('/v1/users', userRoute);
 
 mongoose.connect(`mongodb+srv://${DB_USERNAME}:${DB_PASSWORD}@tetplannerpro.3yuf5p8.mongodb.net/${DB_NAME}?appName=TetPlannerPro`)
     .then(async () => {

@@ -1,8 +1,10 @@
 import TaskCategoryModel from "../database/models/taskCategory.model";
+import TaskModel from "../database/models/task.model";
+import ShoppingItemModel from "../database/models/shoppingItem.model";
 import { DbResult } from "../types/dbResult";
-import { ITaskCategory } from "../database/models/taskCategory.model";
 import { TaskCategory, CreateTaskCategoryInput, UpdateTaskCategoryInput } from "../types/taskCategory.type";
 import { ObjectId } from "mongodb";
+import mongoose from "mongoose";
 
 export const createTaskCategory = async (
   payload: CreateTaskCategoryInput
@@ -138,34 +140,68 @@ export const updateTaskCategory = async (
 };
 
 export const deleteTaskCategory = async (
-  userObjectid: ObjectId,
+  userObjectId: ObjectId,
   categoryObjectId: ObjectId
-): Promise<DbResult<object>> => {
-  try {
-    const taskCategory = await TaskCategoryModel.findOneAndDelete({
-      _id: categoryObjectId,
-      user_id: userObjectid,
-    });
+): Promise<DbResult<{ message: string }>> => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-    if (!taskCategory) {
+  try {
+    const category = await TaskCategoryModel.findOneAndDelete(
+      {
+        _id: categoryObjectId,
+        user_id: userObjectId,
+      },
+      { session }
+    );
+
+    if (!category) {
+      await session.abortTransaction();
       return {
         status: "error",
-        message: "Task category not found",
+        message: "Task category not found or not authorized",
       };
     }
+
+    const tasks = await TaskModel.find(
+      { category_id: categoryObjectId },
+      { _id: 1 },
+      { session }
+    );
+
+    const taskIds = tasks.map(t => t._id);
+
+    if (taskIds.length > 0) {
+      await ShoppingItemModel.deleteMany(
+        { task_id: { $in: taskIds } },
+        { session }
+      );
+
+      await TaskModel.deleteMany(
+        { _id: { $in: taskIds } },
+        { session }
+      );
+    }
+
+    await session.commitTransaction();
 
     return {
       status: "success",
       data: {
-        "message": "Task category deleted successfully"
+        message: "Task category, related tasks and shopping items deleted successfully",
       },
     };
   } catch (error) {
+    await session.abortTransaction();
     console.error("Failed to delete task category:", error);
     return {
       status: "error",
       message:
-        error instanceof Error ? error.message : "Failed to delete task category",
+        error instanceof Error
+          ? error.message
+          : "Failed to delete task category",
     };
+  } finally {
+    session.endSession();
   }
 };

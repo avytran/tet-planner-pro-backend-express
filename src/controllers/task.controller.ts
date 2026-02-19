@@ -21,7 +21,7 @@ export const createTaskController = async (
     const { categoryId, title, duedTime, timeline, priority, status } =
       req.body;
 
-    const userId = req.user.id as string;
+    const userId = req.user.sub as string;
 
     if (!checkValidId(categoryId) || !checkValidId(userId)) {
       return res.status(400).json({
@@ -63,7 +63,7 @@ export const getTasksController = async (
   try {
     const { categoryId, timeline, priority, status } = req.query;
 
-    const userId = req.user.id as string;
+    const userId = req.user.sub as string;
 
     if (!checkValidId(userId)) {
       return res.status(400).json({
@@ -113,7 +113,7 @@ export const getTaskByIdController = async (
 ) => {
   try {
     const { taskId } = req.params;
-    const userId = req.user.id as string;
+    const userId = req.user.sub as string;
 
     if (!checkValidId(taskId as string) || !checkValidId(userId)) {
       return res.status(400).json({
@@ -147,7 +147,7 @@ export const updateTaskController = async (
     const { taskId } = req.params;
     const { categoryId, title, duedTime, timeline, priority, status } =
       req.body;
-    const userId = req.user.id as string;
+    const userId = req.user.sub as string;
 
     if (!checkValidId(taskId as string) || !checkValidId(categoryId)  || !checkValidId(userId)) {
       return res.status(400).json({
@@ -190,7 +190,7 @@ export const patchTaskController = async (
     const { taskId } = req.params;
     const { categoryId, title, duedTime, timeline, priority, status } =
       req.body;
-    const userId = req.user.id as string;
+    const userId = req.user.sub as string;
 
     if (!checkValidId(taskId as string) || (categoryId && !checkValidId(categoryId as string)) || !checkValidId(userId)) {
       return res.status(400).json({
@@ -249,7 +249,7 @@ export const deleteTaskController = async (
 ) => {
   try {
     const { taskId } = req.params;
-    const userId = req.user.id as string;
+    const userId = req.user.sub as string;
 
     if (!checkValidId(taskId as string) || !checkValidId(userId)) {
       return res.status(400).json({

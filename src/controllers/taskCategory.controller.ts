@@ -16,7 +16,7 @@ export const createTaskCategoryController = async (
 ) => {
   try {
     const { name } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.sub;
 
     if (!checkValidId(userId)) {
       return res.status(400).json({
@@ -48,7 +48,7 @@ export const getTaskCategoriesController = async (
   next: NextFunction
 ) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.sub;
 
     if (!checkValidId(userId)) {
       return res.status(400).json({
@@ -78,7 +78,7 @@ export const getTaskCategoryByIdController = async (
 ) => {
   try {
     const categoryId = req.params.categoryId as string;
-    const userId = req.user.id;
+    const userId = req.user.sub;
 
     if (!checkValidId(userId) || !checkValidId(categoryId)) {
       return res.status(400).json({
@@ -115,7 +115,7 @@ export const updateTaskCategoryController = async (
 ) => {
   try {
     const categoryId = req.params.categoryId as string;
-    const userId = req.user.id;
+    const userId = req.user.sub;
     const { name } = req.body;
 
     if (!checkValidId(userId) || !checkValidId(categoryId)) {
@@ -152,7 +152,7 @@ export const deleteTaskCategoryController = async (
 ) => {
   try {
     const categoryId = req.params.categoryId as string;
-    const userId = req.user.id;
+    const userId = req.user.sub;
 
     if (!checkValidId(userId) || !checkValidId(categoryId)) {
       return res.status(400).json({

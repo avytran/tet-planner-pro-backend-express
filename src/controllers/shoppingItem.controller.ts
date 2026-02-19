@@ -8,7 +8,7 @@ export const getShoppingItemByIdController = async (
 ) => {
   try {
     const itemId = req.params.itemId as string;
-    const userId = req.user.id as string;
+    const userId = req.user.sub as string;
 
     if (!checkValidId(itemId) || !checkValidId(userId)) {
       return res.status(400).json({
@@ -46,7 +46,7 @@ export const getShoppingItemsController = async (
   const query = req.query;
 
   try {
-    const userId = req.user.id as string;
+    const userId = req.user.sub as string;
 
     if (!checkValidId(userId)) {
       return res.status(400).json({
@@ -79,7 +79,7 @@ export const deleteShoppingItemController = async (
 ) => {
   try {
     const itemId = req.params.itemId as string;
-    const userId = req.user.id as string;
+    const userId = req.user.sub as string;
 
     if (!checkValidId(itemId) || !checkValidId(userId)) {
       return res.status(400).json({
@@ -117,7 +117,7 @@ export const createShoppingItemController = async (
   const item = req.body;
 
   try {
-    const userId = req.user.id as string;
+    const userId = req.user.sub as string;
 
     if (!checkValidId(item.budgetId) || !checkValidId(item.taskId) || !checkValidId(userId)) {
       return res.status(400).json({
@@ -154,7 +154,7 @@ export const updateAllFieldsOfShoppingItemController = async (
 ) => {
   const itemId = req.params.itemId as string;
   const item = req.body;
-  const userId = req.user.id as string;
+  const userId = req.user.sub as string;
 
   try {
     if (!checkValidId(item.budgetId) || !checkValidId(item.taskId) || !checkValidId(userId)) {

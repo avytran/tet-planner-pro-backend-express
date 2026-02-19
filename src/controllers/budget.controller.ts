@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 
 export const getBudgetByIdController = async (req: Request, res: Response) => {
     const budgetId = req.params.budgetId as string;
-    const userId = req.user.id as string;
+    const userId = req.user.sub as string;
 
     try {
         if (!checkValidId(budgetId)) {
@@ -35,17 +35,17 @@ export const getBudgetByIdController = async (req: Request, res: Response) => {
 }
 
 export const getBudgetsController = async (req: Request, res: Response) => {
-    const { id } = req.user;
+    const userId = req.user.sub;
 
     try {
-        if (!checkValidId(id)) {
+        if (!checkValidId(userId)) {
             return res.status(400).json({
                 status: "error",
                 message: "Invalid ID format",
             })
         }
 
-        const result = await getBudgets(id);
+        const result = await getBudgets(userId);
 
         if (result.status === "error") {
             if (result.message === "Budget not found") {
@@ -67,7 +67,7 @@ export const getBudgetsController = async (req: Request, res: Response) => {
 
 export const deleteBudgetController = async (req: Request, res: Response) => {
     const budgetId = req.params.budgetId as string;
-    const userId = req.user.id as string;
+    const userId = req.user.sub as string;
 
     try {
         if (!checkValidId(budgetId)) {
@@ -101,7 +101,7 @@ export const deleteBudgetController = async (req: Request, res: Response) => {
 
 export const createBudgetController = async (req: Request, res: Response) => {
     const { name, allocatedAmount } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.sub;
 
     try {
         if (!checkValidId(userId)) {
@@ -129,7 +129,7 @@ export const createBudgetController = async (req: Request, res: Response) => {
 
 export const updateBudgetController = async (req: Request, res: Response) => {
     const { name, allocatedAmount } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.sub;
     const budgetId = req.params.budgetId as string;
 
     try {

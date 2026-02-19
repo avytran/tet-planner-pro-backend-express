@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 
 export const verifyUser = (req: Request, res: Response, next: NextFunction) => {
-    const authUserId = req.user.id;
+    const authUserId = req.user.sub;
     const pathUserId = req.params.userId;
 
     if (authUserId !== pathUserId) {

@@ -4,7 +4,7 @@ import { getTotalBudgetOfUser, updateTotalBudgetOfUser } from "../services/user.
 
 export const getTotalBudgetOfUserController = async (req: Request, res: Response) => {
     try {
-        const userId = req.user.id;
+        const userId = req.user.sub;
 
         if (!checkValidId(userId)) {
             return res.status(400).json({
@@ -34,7 +34,7 @@ export const getTotalBudgetOfUserController = async (req: Request, res: Response
 
 export const updateTotalBudgetOfUserController = async (req: Request, res: Response) => {
     try {
-        const userId = req.user.id;
+        const userId = req.user.sub;
         const { totalBudget } = req.body;
 
         if (!checkValidId(userId)) {

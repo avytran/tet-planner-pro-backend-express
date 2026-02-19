@@ -21,7 +21,6 @@ export const verifyJwt = (req: Request, res: Response, next: NextFunction) => {
                 message: "Invalid token"
             });
         }
-        console.log(decoded);
         
         req.user = decoded;
         next();

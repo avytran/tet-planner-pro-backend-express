@@ -1,5 +1,5 @@
-const TIMELINE_ENUM = ["Pre Tet", "During Tet", "After Tet"];
-const STATUS_ENUM = ["Todo", "In Progress", "Done"];
+const TIMELINE_ENUM = ["Pre_Tet", "During_Tet", "After_Tet"];
+const STATUS_ENUM = ["Todo", "In_Progress", "Done"];
 const PRIORITY_ENUM = ["Low", "Medium", "High"];
 
 const basedTaskAjvSchema = {

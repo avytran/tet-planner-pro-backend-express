@@ -1,7 +1,7 @@
 {
-  "name": "server-et-webapp",
+  "name": "tet-planner-pro-backend-express",
   "version": "1.0.0",
-  "description": "server-et-webapp",
+  "description": "tet-planner-pro-backend-express",
   "main": "index.js",
   "scripts": {
     "prepare": "husky install",

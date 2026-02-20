@@ -32,7 +32,7 @@ const TaskSchema: Schema<ITask> = new Schema(
 
     timeline: {
       type: String,
-      enum: ["Pre Tet", "During Tet", "After Tet"],
+      enum: ["Pre_Tet", "During_Tet", "After_Tet"],
       required: true,
     },
 
@@ -44,7 +44,7 @@ const TaskSchema: Schema<ITask> = new Schema(
 
     status: {
       type: String,
-      enum: ["Todo", "In Progress", "Done"],
+      enum: ["Todo", "In_Progress", "Done"],
       default: "Todo",
       required: true,
     },

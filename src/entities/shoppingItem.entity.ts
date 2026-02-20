@@ -1,4 +1,4 @@
-const TIMELINE_ENUM = ["Pre Tet", "During Tet", "After Tet"];
+const TIMELINE_ENUM = ["Pre_Tet", "During_Tet", "After_Tet"];
 const STATUS_ENUM = ["Planning", "Completed"];
 
 const basedShoppingItemAjvSchema = {

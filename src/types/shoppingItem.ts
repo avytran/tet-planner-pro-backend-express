@@ -1,7 +1,7 @@
 import { BudgetForShoppingItem } from "./budget";
 import { TaskForShoppingItem } from "./task";
 
-export type Timeline = "Pre Tet" | "During Tet" | "After Tet";
+export type Timeline = "Pre_Tet" | "During_Tet" | "After_Tet";
 export type ShoppingStatus = "Planning" | "Completed";
 
 export interface ShoppingItem {

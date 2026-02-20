@@ -54,7 +54,7 @@ const ShoppingItemSchema: Schema<IShoppingItem> = new Schema(
 
     timeline: {
       type: String,
-      enum: ["Pre Tet", "During Tet", "After Tet"],
+      enum: ["Pre_Tet", "During_Tet", "After_Tet"],
       required: true,
     },
 

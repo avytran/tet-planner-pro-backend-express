@@ -1,8 +1,8 @@
 import { ObjectId } from "mongodb";
 
-export type Timeline = "Pre Tet" | "During Tet" | "After Tet";
+export type Timeline = "Pre_Tet" | "During_Tet" | "After_Tet";
 export type Priority = "Low" | "Medium" | "High";
-export type TaskStatus = "Todo" | "In Progress" | "Done";
+export type TaskStatus = "Todo" | "In_Progress" | "Done";
 
 export interface Task {
   id: string;

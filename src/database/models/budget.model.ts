@@ -2,11 +2,11 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 import { ObjectId } from "mongodb";
 
 export interface IBudget extends Document {
-    user_id: ObjectId,
-    name: string,
-    allocated_amount: number,
-    created_at: Date,
-    updated_at: Date,
+    user_id: ObjectId;
+    name: string;
+    allocated_amount: number;
+    created_at: Date;
+    updated_at: Date;
 };
 
 const BudgetSchema: Schema<IBudget> = new Schema(
